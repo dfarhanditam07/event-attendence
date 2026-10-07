@@ -18,7 +18,6 @@
             @can('update', $event)
                 <a href="{{ route('events.edit', $event) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-100">Edit</a>
             @endcan
-            <a href="{{ route('events.attendances.check-in', $event) }}" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Check-in</a>
             @can('delete', $event)
                 <form method="POST" action="{{ route('events.destroy', $event) }}"
                       onsubmit="return confirm('Hapus event ini? Data peserta dan absensinya tetap tersimpan, tetapi event tidak akan tampil lagi.')">

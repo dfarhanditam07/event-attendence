@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Event;
+use App\Models\Participant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,6 +12,15 @@ class ParticipantStoreRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->exists('nik')) {
+            $this->merge([
+                'nik' => Participant::normalizeNik($this->input('nik')),
+            ]);
+        }
     }
 
     /**

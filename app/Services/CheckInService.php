@@ -8,75 +8,24 @@ use App\Models\Attendance;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\User;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Carbon;
+use Illuminate\Database\UniqueConstraintViolationException;
 
-class CheckInResult
-{
-    public function __construct(
-        public readonly bool $success,
-        public readonly ?Attendance $attendance = null,
-        public readonly ?Participant $participant = null,
-        public readonly array $errors = [],
-    ) {}
-
-    public static function ok(Attendance $attendance, Participant $participant): self
-    {
-        return new self(true, $attendance, $participant);
-    }
-
-    /**
-     * @param  array<string, list<string>>  $errors
-     */
-    public static function fail(array $errors, ?Participant $participant = null): self
-    {
-        return new self(false, null, $participant, $errors);
-    }
-}
-
+/**
+ * Check-in peserta. Hanya dua cara: input NIK, atau pilih nama dari hasil pencarian.
+ * Satu peserta hanya bisa check-in sekali (dijaga juga oleh UNIQUE di database).
+ */
 class CheckInService
 {
-    /**
-     * Check-in via QR Token (scanner QR).
-     */
-    public function checkInByQrToken(Event $event, string $qrToken, User $checkedInBy, ?string $notes = null): CheckInResult
+    public function checkInByNik(Event $event, string $nik, ?User $checkedInBy = null): CheckInResult
     {
-        if (! $event->status->allowsCheckIn()) {
-            return CheckInResult::fail([
-                '_event' => ['Absensi hanya bisa dilakukan saat event berstatus "'.EventStatus::Open->label().'".'],
-            ]);
+        if ($blocked = $this->guardEvent($event)) {
+            return $blocked;
         }
 
-        $participant = Participant::where('event_id', $event->id)
-            ->where('qr_token', $qrToken)
-            ->first();
+        $nik = Participant::normalizeNik($nik);
 
-        if (! $participant) {
-            return CheckInResult::fail([
-                '_participant' => ['QR tidak dikenali untuk event ini.'],
-            ]);
-        }
-
-        return $this->persistCheckIn($event, $participant, AttendanceMethod::Qr, $checkedInBy, $notes);
-    }
-
-    /**
-     * Check-in via input NIK.
-     */
-    public function checkInByNik(Event $event, string $nik, User $checkedInBy, ?string $notes = null): CheckInResult
-    {
-        if (! $event->status->allowsCheckIn()) {
-            return CheckInResult::fail([
-                '_event' => ['Absensi hanya bisa dilakukan saat event berstatus "'.EventStatus::Open->label().'".'],
-            ]);
-        }
-
-        $nik = trim((string) $nik);
-
-        if ($nik === '') {
-            return CheckInResult::fail([
-                'nik' => ['NIK wajib diisi.'],
-            ]);
+        if ($nik === null) {
+            return CheckInResult::fail(['nik' => ['NIK wajib diisi.']]);
         }
 
         $participant = Participant::where('event_id', $event->id)
@@ -85,26 +34,21 @@ class CheckInService
 
         if (! $participant) {
             return CheckInResult::fail([
-                '_participant' => ['NIK "'.e($nik).'" tidak terdaftar di event ini.'],
+                '_participant' => ['NIK tidak ditemukan di event ini. Periksa kembali atau hubungi panitia.'],
             ]);
         }
 
-        return $this->persistCheckIn($event, $participant, AttendanceMethod::Nik, $checkedInBy, $notes);
+        return $this->persist($event, $participant, AttendanceMethod::Nik, $checkedInBy);
     }
 
-    /**
-     * Check-in manual: pilih participant dari daftar.
-     */
-    public function checkInManual(Event $event, int $participantId, User $checkedInBy, ?string $notes = null): CheckInResult
+    public function checkInByName(Event $event, int $participantId, ?User $checkedInBy = null): CheckInResult
     {
-        if (! $event->status->allowsCheckIn()) {
-            return CheckInResult::fail([
-                '_event' => ['Absensi hanya bisa dilakukan saat event berstatus "'.EventStatus::Open->label().'".'],
-            ]);
+        if ($blocked = $this->guardEvent($event)) {
+            return $blocked;
         }
 
         $participant = Participant::where('event_id', $event->id)
-            ->where('id', $participantId)
+            ->whereKey($participantId)
             ->first();
 
         if (! $participant) {
@@ -113,25 +57,26 @@ class CheckInService
             ]);
         }
 
-        return $this->persistCheckIn($event, $participant, AttendanceMethod::Manual, $checkedInBy, $notes);
+        return $this->persist($event, $participant, AttendanceMethod::Name, $checkedInBy);
     }
 
-    private function persistCheckIn(
-        Event $event,
-        Participant $participant,
-        AttendanceMethod $method,
-        User $checkedInBy,
-        ?string $notes,
-    ): CheckInResult {
+    private function guardEvent(Event $event): ?CheckInResult
+    {
+        if ($event->status->allowsCheckIn()) {
+            return null;
+        }
+
+        return CheckInResult::fail([
+            '_event' => ['Check-in hanya bisa dilakukan saat event berstatus "'.EventStatus::Open->label().'".'],
+        ]);
+    }
+
+    private function persist(Event $event, Participant $participant, AttendanceMethod $method, ?User $checkedInBy): CheckInResult
+    {
         $existing = Attendance::where('participant_id', $participant->id)->first();
+
         if ($existing) {
-            return CheckInResult::fail([
-                '_duplicate' => [
-                    $participant->name.' sudah absen sebelumnya pada '.
-                    Carbon::parse($existing->checked_in_at)->translatedFormat('d M Y, H:i').
-                    ' via '.$existing->method->label().'.',
-                ],
-            ], $participant);
+            return $this->duplicate($participant, $existing);
         }
 
         try {
@@ -140,34 +85,27 @@ class CheckInService
                 'participant_id' => $participant->id,
                 'checked_in_at' => now(),
                 'method' => $method,
-                'checked_in_by' => $checkedInBy->id,
-                'notes' => $notes,
+                'checked_in_by' => $checkedInBy?->id,
             ]);
 
             return CheckInResult::ok($attendance, $participant);
-        } catch (QueryException $e) {
-            $code = $e->getCode();
-            $msg = $e->getMessage();
-
-            // Unique constraint violation (participant_id) — race condition detected.
-            if (
-                (is_numeric($code) && (int) $code === 23505) ||
-                (is_string($code) && str_contains($msg, 'unique'))
-            ) {
-                $existing = Attendance::where('participant_id', $participant->id)->first();
-
-                return CheckInResult::fail([
-                    '_duplicate' => [
-                        $participant->name.' sudah absen sebelumnya pada '.
-                        ($existing ? Carbon::parse($existing->checked_in_at)->translatedFormat('d M Y, H:i') : '—').
-                        '.',
-                    ],
-                ], $participant);
-            }
-
-            return CheckInResult::fail([
-                '_system' => ['Gagal menyimpan absensi: '.$msg],
-            ], $participant);
+        } catch (UniqueConstraintViolationException) {
+            // Dua permintaan masuk bersamaan; yang kedua kalah di constraint database.
+            return $this->duplicate(
+                $participant,
+                Attendance::where('participant_id', $participant->id)->first(),
+            );
         }
+    }
+
+    private function duplicate(Participant $participant, ?Attendance $existing): CheckInResult
+    {
+        $detail = $existing
+            ? ' pada '.$existing->checked_in_at->translatedFormat('d M Y, H:i').' ('.$existing->method->label().')'
+            : '';
+
+        return CheckInResult::fail([
+            '_duplicate' => [$participant->name.' sudah check-in sebelumnya'.$detail.'.'],
+        ], $participant);
     }
 }

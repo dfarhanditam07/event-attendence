@@ -12,10 +12,6 @@
             <div class="mt-1 text-sm text-slate-500">Daftar kehadiran</div>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('events.attendances.check-in', $event) }}"
-               class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-100">
-                Halaman Check-in
-            </a>
             <a href="{{ route('events.attendances.export', $event) }}"
                class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
                 Export CSV
@@ -72,8 +68,8 @@
 
     @if($attendances->isEmpty())
         <div class="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
-            Belum ada data kehadiran untuk event ini.
-            <a href="{{ route('events.attendances.check-in', $event) }}" class="text-indigo-600 hover:underline">Buka halaman check-in</a>.
+            Belum ada data kehadiran untuk event ini. Peserta melakukan check-in sendiri lewat link publik di halaman
+            <a href="{{ route('events.show', $event) }}" class="text-indigo-600 hover:underline">detail event</a>.
         </div>
     @else
         <div class="overflow-hidden rounded-lg border border-slate-200 bg-white">
@@ -85,8 +81,6 @@
                             <th class="px-4 py-3 font-medium text-slate-600">Nama</th>
                             <th class="px-4 py-3 font-medium text-slate-600">NIK / Organisasi</th>
                             <th class="px-4 py-3 font-medium text-slate-600">Metode</th>
-                            <th class="px-4 py-3 font-medium text-slate-600">Oleh</th>
-                            <th class="px-4 py-3 font-medium text-slate-600">Catatan</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -114,20 +108,13 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     @php($badgeClass = match($a->method) {
-                                        \App\Enums\AttendanceMethod::Qr => 'bg-indigo-50 text-indigo-700',
                                         \App\Enums\AttendanceMethod::Nik => 'bg-sky-50 text-sky-700',
-                                        \App\Enums\AttendanceMethod::Manual => 'bg-amber-50 text-amber-700',
+                                        \App\Enums\AttendanceMethod::Name => 'bg-amber-50 text-amber-700',
                                         default => 'bg-slate-100 text-slate-700',
                                     })
                                     <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $badgeClass }}">
                                         {{ $a->method->label() }}
                                     </span>
-                                </td>
-                                <td class="px-4 py-3 text-slate-600 text-xs">
-                                    {{ $a->checkedInBy?->name ?? '—' }}
-                                </td>
-                                <td class="px-4 py-3 text-slate-600 text-xs">
-                                    {{ $a->notes ?: '—' }}
                                 </td>
                             </tr>
                         @endforeach

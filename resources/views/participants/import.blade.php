@@ -45,6 +45,8 @@
                             <li><code class="rounded bg-white px-1 py-0.5">phone</code> / <code class="rounded bg-white px-1 py-0.5">no_hp</code> (opsional)</li>
                             <li><code class="rounded bg-white px-1 py-0.5">organization</code> / <code class="rounded bg-white px-1 py-0.5">instansi</code> (opsional)</li>
                         </ul>
+                        <p class="mt-3">Pemisah koma maupun titik koma (Excel Indonesia) dikenali otomatis. Maksimal 5.000 baris per file.</p>
+                        <p class="mt-1 font-medium text-amber-800">Penting: di Excel, format kolom <code class="rounded bg-white px-1 py-0.5">nik</code> dan <code class="rounded bg-white px-1 py-0.5">phone</code> sebagai <em>Text</em> sebelum mengisi, agar angka panjang tidak berubah menjadi 3,2E+15 dan angka 0 di depan tidak hilang.</p>
                     </div>
 
                     <button type="submit"
@@ -120,7 +122,7 @@
                                             @if(filled($fail['data'][$k] ?? null))
                                                 <div>
                                                     <span class="font-medium text-slate-500">{{ $k }}:</span>
-                                                    {{ e($fail['data'][$k]) }}
+                                                    {{ $fail['data'][$k] }}
                                                 </div>
                                             @endif
                                         @endforeach

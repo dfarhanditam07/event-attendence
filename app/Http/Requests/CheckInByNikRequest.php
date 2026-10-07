@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Participant;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CheckInByNikRequest extends FormRequest
@@ -11,6 +12,13 @@ class CheckInByNikRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'nik' => Participant::normalizeNik($this->input('nik')) ?? '',
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -18,7 +26,6 @@ class CheckInByNikRequest extends FormRequest
     {
         return [
             'nik' => ['required', 'string', 'max:32'],
-            'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -29,7 +36,6 @@ class CheckInByNikRequest extends FormRequest
     {
         return [
             'nik' => 'NIK',
-            'notes' => 'catatan',
         ];
     }
 

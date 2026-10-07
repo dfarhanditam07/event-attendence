@@ -17,13 +17,9 @@ class ParticipantImportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => [
-                'required',
-                'file',
-                'mimes:csv,txt',
-                'mimetypes:text/csv,text/plain,application/csv,text/comma-separated-values,text/anytext,application/octet-stream',
-                'max:5120',
-            ],
+            // Cek ekstensi (bukan MIME): CSV dari Excel sering terbaca sebagai
+            // application/vnd.ms-excel sehingga ditolak oleh aturan "mimes".
+            'file' => ['required', 'file', 'extensions:csv,txt', 'max:5120'],
         ];
     }
 
@@ -35,7 +31,7 @@ class ParticipantImportRequest extends FormRequest
         return [
             'required' => ':attribute wajib dipilih.',
             'file' => ':attribute harus berupa file.',
-            'mimes' => ':attribute harus berformat CSV (.csv).',
+            'extensions' => ':attribute harus berformat CSV (.csv).',
             'max' => ':attribute maksimal :max KB.',
         ];
     }

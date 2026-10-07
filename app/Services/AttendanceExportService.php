@@ -44,12 +44,10 @@ class AttendanceExportService
                 'Status Kehadiran',
                 'Waktu Check-in',
                 'Metode Check-in',
-                'Dicatat Oleh',
-                'Catatan',
-            ]);
+            ], ',', '"', '\\');
 
             $participants = $event->participants()
-                ->with(['attendance.checkedInBy'])
+                ->with('attendance')
                 ->orderByRaw('LOWER(name) ASC')
                 ->lazyById(500);
 
@@ -61,24 +59,36 @@ class AttendanceExportService
 
                 fputcsv($handle, [
                     $i,
-                    $p->name,
-                    $p->nik ?? '',
-                    $p->email ?? '',
-                    $p->phone ?? '',
-                    $p->organization ?? '',
+                    $this->safe($p->name),
+                    $this->safe($p->nik),
+                    $this->safe($p->email),
+                    $this->safe($p->phone),
+                    $this->safe($p->organization),
                     $attendance ? 'Hadir' : 'Belum Hadir',
                     $attendance?->checked_in_at
                         ? Carbon::parse($attendance->checked_in_at)->translatedFormat('d M Y, H:i')
                         : '',
-                    $attendance?->method?->label() ?? '',
-                    $attendance?->checkedInBy?->name ?? '',
-                    $attendance?->notes ?? '',
-                ]);
+                    $attendance?->method->label() ?? '',
+                ], ',', '"', '\\');
             }
 
             fclose($handle);
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Cegah CSV/formula injection: sel yang diawali = + - @ dianggap rumus oleh Excel.
+     */
+    private function safe(?string $value): string
+    {
+        $value ??= '';
+
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+            return "'".$value;
+        }
+
+        return $value;
     }
 }
