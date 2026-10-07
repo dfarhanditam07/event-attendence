@@ -50,7 +50,7 @@
                             @endif
                         </td>
                         <td class="whitespace-nowrap px-4 py-3">{{ $event->starts_at->translatedFormat('d M Y, H:i') }}</td>
-                        <td class="px-4 py-3">@include('events._status', ['status' => $event->status])</td>
+                        <td class="px-4 py-3">@include('events._status', ['status' => $event->effectiveStatus()])</td>
                         <td class="px-4 py-3 text-right">{{ $event->participants_count }}</td>
                         <td class="px-4 py-3 text-right">{{ $event->attendances_count }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-right">

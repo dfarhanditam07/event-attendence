@@ -2,9 +2,7 @@
 
 @section('content')
     @if(! $canCheckIn)
-        <div class="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center text-sm text-amber-900">
-            Check-in belum dibuka untuk acara ini. Hubungi panitia jika Anda yakin ini sebuah kesalahan.
-        </div>
+        @include('public._unavailable')
     @else
         <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-300/30 sm:p-8">
             <div class="text-center">

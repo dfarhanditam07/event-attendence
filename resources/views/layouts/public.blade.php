@@ -34,7 +34,7 @@
             <div class="text-center">
                 <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
                     <h1 class="text-3xl font-extrabold uppercase tracking-tight text-enc-950 sm:text-4xl lg:text-5xl">{{ $event->name }}</h1>
-                    @include('events._status', ['status' => $event->status, 'size' => 'lg'])
+                    @include('events._status', ['status' => $event->effectiveStatus(), 'size' => 'lg'])
                 </div>
 
                 <p class="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-slate-700 sm:text-base">

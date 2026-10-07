@@ -56,8 +56,73 @@ class PublicCheckInControllerTest extends TestCase
 
         $this->get(route('public.events.check-in', $this->publicParams($event)))
             ->assertOk()
+            ->assertSee('Check-in sudah ditutup')
+            ->assertDontSee('Cari Nama');
+    }
+
+    public function test_draft_event_hides_check_in_forms_and_rejects_submit(): void
+    {
+        $event = Event::factory()->draft()->create();
+        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+
+        $this->get(route('public.events.check-in', $this->publicParams($event)))
+            ->assertOk()
             ->assertSee('Check-in belum dibuka')
             ->assertDontSee('Cari Nama');
+
+        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
+            'nik' => '3201010101900001',
+        ])->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === false);
+
+        $this->assertDatabaseMissing('attendances', ['participant_id' => $participant->id]);
+    }
+
+    public function test_open_event_is_closed_automatically_after_end_time(): void
+    {
+        $event = Event::factory()->create([
+            'starts_at' => now()->subHours(5),
+            'ends_at' => now()->subHour(),
+        ]);
+        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+
+        $this->get(route('public.events.check-in', $this->publicParams($event)))
+            ->assertOk()
+            ->assertSee('Check-in sudah ditutup')
+            ->assertSee('Ditutup')
+            ->assertDontSee('Cari Nama');
+
+        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
+            'nik' => '3201010101900001',
+        ])->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === false);
+
+        $this->assertDatabaseMissing('attendances', ['participant_id' => $participant->id]);
+    }
+
+    public function test_open_event_accepts_check_in_until_the_end_time_passes(): void
+    {
+        $event = Event::factory()->create([
+            'starts_at' => now()->subHour(),
+            'ends_at' => now()->addHour(),
+        ]);
+        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+
+        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
+            'nik' => '3201010101900001',
+        ])->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === true);
+
+        $this->assertDatabaseHas('attendances', ['participant_id' => $participant->id]);
+    }
+
+    public function test_open_event_without_end_time_stays_open(): void
+    {
+        $event = Event::factory()->create([
+            'starts_at' => now()->subDays(3),
+            'ends_at' => null,
+        ]);
+
+        $this->get(route('public.events.check-in', $this->publicParams($event)))
+            ->assertOk()
+            ->assertSee('Cari Nama');
     }
 
     public function test_name_search_requires_three_characters(): void

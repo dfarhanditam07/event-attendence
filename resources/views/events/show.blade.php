@@ -10,7 +10,13 @@
         <div>
             <h1 class="text-2xl font-semibold">{{ $event->name }}</h1>
             <div class="mt-1 flex items-center gap-2">
-                @include('events._status', ['status' => $event->status])
+                @include('events._status', ['status' => $event->effectiveStatus()])
+                @if($event->status === \App\Enums\EventStatus::Open && $event->ends_at)
+                    <span class="text-xs text-slate-500">
+                        {{ $event->ends_at->isPast() ? 'Ditutup otomatis sejak' : 'Otomatis ditutup' }}
+                        {{ $event->ends_at->translatedFormat('d M Y, H:i') }}
+                    </span>
+                @endif
             </div>
         </div>
 

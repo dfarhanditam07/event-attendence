@@ -30,6 +30,7 @@
             <input id="ends_at" name="ends_at" type="datetime-local"
                    value="{{ old('ends_at', $event->ends_at?->format('Y-m-d\TH:i')) }}" class="{{ $input }}">
             @error('ends_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            <p class="mt-1 text-xs text-slate-500">Check-in otomatis ditutup saat waktu selesai tiba. Kosongkan jika ingin menutup manual.</p>
         </div>
     </div>
 
@@ -40,7 +41,7 @@
                 <option value="{{ $status->value }}" @selected($currentStatus === $status->value)>{{ $status->label() }}</option>
             @endforeach
         </select>
-        <p class="mt-1 text-xs text-slate-500">Absensi hanya bisa dilakukan saat status “Dibuka”.</p>
+        <p class="mt-1 text-xs text-slate-500">Absensi hanya bisa dilakukan saat status “Dibuka” dan sebelum waktu selesai.</p>
         @error('status')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>
 

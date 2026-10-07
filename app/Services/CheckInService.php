@@ -62,7 +62,7 @@ class CheckInService
 
     private function guardEvent(Event $event): ?CheckInResult
     {
-        if ($event->status->allowsCheckIn()) {
+        if ($event->allowsCheckIn()) {
             return null;
         }
 

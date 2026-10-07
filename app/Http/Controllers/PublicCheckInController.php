@@ -26,7 +26,7 @@ class PublicCheckInController extends Controller
 
         return view('public.check_in_welcome', [
             'event' => $event,
-            'canCheckIn' => $event->status->allowsCheckIn(),
+            'canCheckIn' => $event->allowsCheckIn(),
         ]);
     }
 
@@ -38,7 +38,7 @@ class PublicCheckInController extends Controller
         $search = '';
         $candidates = collect();
 
-        if ($mode === 'name' && $event->status->allowsCheckIn()) {
+        if ($mode === 'name' && $event->allowsCheckIn()) {
             $search = trim((string) $request->validated('q'));
 
             if ($this->searchLength($search) >= self::MIN_NAME_SEARCH_LENGTH) {
@@ -65,7 +65,7 @@ class PublicCheckInController extends Controller
             'searchTooShort' => $search !== '' && $this->searchLength($search) < self::MIN_NAME_SEARCH_LENGTH,
             'candidates' => $candidates,
             'lastResult' => session('public_check_in_result'),
-            'canCheckIn' => $event->status->allowsCheckIn(),
+            'canCheckIn' => $event->allowsCheckIn(),
         ]);
     }
 

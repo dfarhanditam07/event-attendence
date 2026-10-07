@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EventStatus;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -65,5 +66,45 @@ class Event extends Model
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Status yang berlaku saat ini. Event berstatus "Dibuka" otomatis dianggap
+     * "Ditutup" begitu waktu selesai (ends_at) terlewati, tanpa perlu scheduler/cron.
+     * Kalau ends_at kosong, event tetap terbuka sampai status diubah manual.
+     */
+    public function effectiveStatus(): EventStatus
+    {
+        if ($this->status === EventStatus::Open && $this->ends_at?->isPast()) {
+            return EventStatus::Closed;
+        }
+
+        return $this->status;
+    }
+
+    public function allowsCheckIn(): bool
+    {
+        return $this->effectiveStatus()->allowsCheckIn();
+    }
+
+    /**
+     * Filter berdasarkan status efektif (lihat effectiveStatus()), supaya hasil filter
+     * sejalan dengan badge status yang tampil di layar.
+     *
+     * @param  Builder<Event>  $query
+     * @return Builder<Event>
+     */
+    public function scopeWithEffectiveStatus(Builder $query, EventStatus $status): Builder
+    {
+        $open = EventStatus::Open->value;
+
+        return match ($status) {
+            EventStatus::Open => $query->where('status', $open)
+                ->where(fn (Builder $q) => $q->whereNull('ends_at')->orWhere('ends_at', '>=', now())),
+            EventStatus::Closed => $query->where(fn (Builder $q) => $q
+                ->where('status', EventStatus::Closed->value)
+                ->orWhere(fn (Builder $o) => $o->where('status', $open)->where('ends_at', '<', now()))),
+            default => $query->where('status', $status->value),
+        };
     }
 }

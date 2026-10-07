@@ -24,7 +24,7 @@ class EventController extends Controller
             )
             ->when(
                 $request->enum('status', EventStatus::class),
-                fn ($query, $status) => $query->where('status', $status->value),
+                fn ($query, $status) => $query->withEffectiveStatus($status),
             )
             ->orderByDesc('starts_at')
             ->paginate(10)
