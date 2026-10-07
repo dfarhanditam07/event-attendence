@@ -1,18 +1,22 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views';
+@source '../../storage/framework/views';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Warna brand ENC (halaman check-in publik). */
+    /* Warna brand korporat ENC */
     --color-enc-950: #0b1635;
     --color-enc-900: #101f45;
     --color-enc-800: #1b2f5c;
     --color-enc-700: #26427a;
     --color-enc-600: #2f5597;
     --color-enc-500: #4a80d0;
+    --color-enc-400: #6ea2e6;
+    --color-enc-300: #9fc1f0;
+    --color-enc-200: #c4d9f6;
     --color-enc-100: #dce8f8;
+    --color-enc-50: #f1f6fd;
 }

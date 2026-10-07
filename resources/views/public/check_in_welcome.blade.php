@@ -4,36 +4,76 @@
     @if(! $canCheckIn)
         @include('public._unavailable')
     @else
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-300/30 sm:p-8">
+        <div class="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/40">
             <div class="text-center">
-                <h2 class="text-xl font-bold text-enc-950 sm:text-2xl">Pilih Cara Check-in Anda</h2>
-                <p class="mt-2 text-sm text-slate-700 sm:text-base">Silakan pilih salah satu metode check-in di bawah ini untuk memulai.</p>
+                <div class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-enc-50 text-enc-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <polyline points="17 11 19 13 23 9"/>
+                    </svg>
+                </div>
+                <h2 class="mt-3 text-xl font-bold text-slate-900 sm:text-2xl">Pilih Metode Check-in</h2>
+                <p class="mt-1 text-xs text-slate-500 sm:text-sm">Silakan pilih cara verifikasi kehadiran Anda yang paling mudah.</p>
             </div>
 
             <div class="mt-8 grid gap-4 sm:grid-cols-2 sm:gap-5">
+                <!-- Opsi 1: Cari Nama -->
                 <a href="{{ route('public.events.check-in.mode', ['event' => $event, 'slug' => $event->slug, 'mode' => 'name']) }}"
-                   class="flex flex-col items-center rounded-2xl border border-slate-300 bg-white px-5 py-8 text-center transition hover:border-enc-600 hover:bg-slate-50 hover:shadow-lg hover:shadow-slate-300/50 focus-visible:border-enc-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-enc-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-enc-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="4" y="2.5" width="15" height="19" rx="2.5"/>
-                        <path d="M19 7h2M19 12h2M19 17h2"/>
-                        <circle cx="11.5" cy="9.5" r="2.5"/>
-                        <path d="M7.5 17c.8-2 2.4-3 4-3s3.2 1 4 3"/>
-                    </svg>
-                    <span class="mt-5 text-xl font-bold text-enc-950">Cari Nama Anda</span>
-                    <span class="mt-2 text-sm text-slate-700">Temukan nama Anda langsung dari daftar peserta acara.</span>
+                   class="group relative flex flex-col items-center justify-between rounded-xl border border-slate-200 bg-white p-6 text-center transition-all hover:border-enc-600 hover:bg-slate-50/50 hover:shadow-md hover:ring-2 hover:ring-enc-600/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-enc-600">
+                    <div class="flex flex-col items-center">
+                        <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-enc-50 text-enc-800 transition group-hover:bg-enc-800 group-hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                <path d="M11 8v6"/>
+                                <path d="M8 11h6"/>
+                            </svg>
+                        </span>
+                        <span class="mt-4 text-base font-bold text-slate-900 group-hover:text-enc-950">
+                            Cari Nama Anda
+                        </span>
+                        <span class="mt-1.5 text-xs text-slate-500 leading-relaxed">
+                            Cari nama Anda secara langsung dari daftar undangan peserta acara.
+                        </span>
+                    </div>
+
+                    <span class="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-enc-700 transition group-hover:gap-1.5 group-hover:text-enc-900">
+                        <span>Mulai Check-in</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </span>
                 </a>
 
+                <!-- Opsi 2: Input NIK -->
                 <a href="{{ route('public.events.check-in.mode', ['event' => $event, 'slug' => $event->slug, 'mode' => 'nik']) }}"
-                   class="flex flex-col items-center rounded-2xl border border-slate-300 bg-white px-5 py-8 text-center transition hover:border-enc-600 hover:bg-slate-50 hover:shadow-lg hover:shadow-slate-300/50 focus-visible:border-enc-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-enc-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-enc-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="3" y="5" width="18" height="15.5" rx="2.5"/>
-                        <rect x="9.5" y="2.5" width="5" height="3.5" rx="1"/>
-                        <circle cx="8" cy="11.5" r="1.8"/>
-                        <path d="M5 17.5c.5-1.6 1.7-2.4 3-2.4s2.5.8 3 2.4"/>
-                        <path d="M13.5 10.5H18M13.5 13.5H18M13.5 16.5H18"/>
-                    </svg>
-                    <span class="mt-5 text-xl font-bold text-enc-950">Input NIK</span>
-                    <span class="mt-2 text-sm text-slate-700">Masukkan Nomor Induk Karyawan Anda yang terdaftar.</span>
+                   class="group relative flex flex-col items-center justify-between rounded-xl border border-slate-200 bg-white p-6 text-center transition-all hover:border-enc-600 hover:bg-slate-50/50 hover:shadow-md hover:ring-2 hover:ring-enc-600/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-enc-600">
+                    <div class="flex flex-col items-center">
+                        <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-enc-50 text-enc-800 transition group-hover:bg-enc-800 group-hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                <line x1="7" y1="8" x2="17" y2="8"/>
+                                <line x1="7" y1="12" x2="11" y2="12"/>
+                                <circle cx="15" cy="12" r="1"/>
+                            </svg>
+                        </span>
+                        <span class="mt-4 text-base font-bold text-slate-900 group-hover:text-enc-950">
+                            Input NIK
+                        </span>
+                        <span class="mt-1.5 text-xs text-slate-500 leading-relaxed">
+                            Masukkan Nomor Induk Karyawan resmi yang terdaftar untuk verifikasi instan.
+                        </span>
+                    </div>
+
+                    <span class="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-enc-700 transition group-hover:gap-1.5 group-hover:text-enc-900">
+                        <span>Mulai Check-in</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </span>
                 </a>
             </div>
         </div>
