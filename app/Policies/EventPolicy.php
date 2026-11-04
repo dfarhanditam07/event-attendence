@@ -31,6 +31,15 @@ class EventPolicy
         return $user->isAdmin();
     }
 
+    /**
+     * Pencatatan serah-terima konsumsi adalah tugas operasional meja panitia,
+     * jadi semua akun aktif (admin maupun panitia) boleh melakukannya.
+     */
+    public function manageConsumption(User $user, Event $event): bool
+    {
+        return true;
+    }
+
     public function delete(User $user, Event $event): bool
     {
         return $user->isAdmin();

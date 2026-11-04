@@ -28,6 +28,8 @@ class EventRequest extends FormRequest
             'starts_at' => ['required', 'date'],
             'ends_at' => ['nullable', 'date', 'after:starts_at'],
             'status' => ['required', Rule::enum(EventStatus::class)],
+            'consumption_pin' => ['nullable', 'string', 'min:4', 'max:32'],
+            'remove_consumption_pin' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -43,6 +45,7 @@ class EventRequest extends FormRequest
             'starts_at' => 'waktu mulai',
             'ends_at' => 'waktu selesai',
             'status' => 'status',
+            'consumption_pin' => 'PIN kiosk konsumsi',
         ];
     }
 
@@ -54,6 +57,7 @@ class EventRequest extends FormRequest
         return [
             'required' => ':attribute wajib diisi.',
             'max' => ':attribute maksimal :max karakter.',
+            'min' => ':attribute minimal :min karakter.',
             'date' => ':attribute bukan tanggal yang valid.',
             'ends_at.after' => 'Waktu selesai harus setelah waktu mulai.',
             'enum' => ':attribute tidak valid.',

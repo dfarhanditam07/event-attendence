@@ -36,5 +36,17 @@
             </svg>
             <span>Daftar Kehadiran</span>
         </a>
+
+        <a href="{{ route('events.consumptions.index', $event) }}"
+           class="inline-flex items-center gap-2 border-b-2 px-3 py-3 font-semibold transition {{ str_starts_with($current, 'events.consumptions.') ? 'border-enc-800 text-enc-950' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {{ str_starts_with($current, 'events.consumptions.') ? 'text-enc-700' : 'text-slate-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                <line x1="6" y1="1" x2="6" y2="4"/>
+                <line x1="10" y1="1" x2="10" y2="4"/>
+                <line x1="14" y1="1" x2="14" y2="4"/>
+            </svg>
+            <span>Konsumsi</span>
+        </a>
     </nav>
 </div>

@@ -51,7 +51,7 @@ class EventController extends Controller
         Gate::authorize('create', Event::class);
 
         $event = Event::create([
-            ...$request->validated(),
+            ...$this->attributesFrom($request),
             'created_by' => $request->user()->id,
         ]);
 
@@ -84,11 +84,37 @@ class EventController extends Controller
         Gate::authorize('update', $event);
 
         // Slug sengaja tidak ikut diubah supaya URL/QR yang sudah beredar tetap valid.
-        $event->update($request->validated());
+        $event->update($this->attributesFrom($request));
 
         return redirect()
             ->route('events.show', $event)
             ->with('success', 'Event berhasil diperbarui.');
+    }
+
+    /**
+     * Atribut event dari request, dengan penanganan khusus PIN kiosk konsumsi.
+     *
+     * PIN tersimpan ter-hash sehingga tidak bisa ditampilkan ulang di form. Karena itu:
+     * - Kolom PIN dibiarkan kosong saat edit -> PIN lama tetap dipertahankan.
+     * - Checkbox "hapus PIN" dicentang -> kiosk dinonaktifkan (PIN dihapus).
+     *
+     * @return array<string, mixed>
+     */
+    private function attributesFrom(EventRequest $request): array
+    {
+        $data = $request->validated();
+        $removePin = (bool) ($data['remove_consumption_pin'] ?? false);
+        $pin = $data['consumption_pin'] ?? null;
+
+        unset($data['remove_consumption_pin']);
+
+        if ($removePin) {
+            $data['consumption_pin'] = null;
+        } elseif (blank($pin)) {
+            unset($data['consumption_pin']);
+        }
+
+        return $data;
     }
 
     public function destroy(Event $event): RedirectResponse

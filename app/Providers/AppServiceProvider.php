@@ -27,5 +27,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('public-check-in', function (Request $request) {
             return Limit::perMinute(120)->by($request->ip());
         });
+
+        // Kiosk konsumsi publik berada di satu perangkat dengan IP yang sama untuk
+        // banyak transaksi berturut-turut, jadi batasnya juga longgar.
+        RateLimiter::for('public-consumption', function (Request $request) {
+            return Limit::perMinute(120)->by($request->ip());
+        });
     }
 }

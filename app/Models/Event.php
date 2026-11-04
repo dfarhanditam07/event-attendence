@@ -11,9 +11,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'slug', 'description', 'location', 'starts_at', 'ends_at', 'status', 'created_by'])]
+#[Fillable(['name', 'slug', 'description', 'location', 'starts_at', 'ends_at', 'status', 'consumption_pin', 'created_by'])]
 class Event extends Model
 {
     /** @use HasFactory<EventFactory> */
@@ -28,6 +29,8 @@ class Event extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'status' => EventStatus::class,
+            // PIN disimpan sebagai hash; tidak pernah dikembalikan dalam bentuk asli.
+            'consumption_pin' => 'hashed',
         ];
     }
 
@@ -68,6 +71,16 @@ class Event extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    public function consumptionPickups(): HasMany
+    {
+        return $this->hasMany(ConsumptionPickup::class);
+    }
+
+    public function consumptionClaims(): HasMany
+    {
+        return $this->hasMany(ConsumptionClaim::class);
+    }
+
     /**
      * Status yang berlaku saat ini. Event berstatus "Dibuka" otomatis dianggap
      * "Ditutup" begitu waktu selesai (ends_at) terlewati, tanpa perlu scheduler/cron.
@@ -85,6 +98,26 @@ class Event extends Model
     public function allowsCheckIn(): bool
     {
         return $this->effectiveStatus()->allowsCheckIn();
+    }
+
+    /**
+     * Kiosk pengambilan konsumsi aktif hanya bila panitia sudah menetapkan PIN konsumsi.
+     */
+    public function hasConsumptionKiosk(): bool
+    {
+        return filled($this->consumption_pin);
+    }
+
+    /**
+     * Cocokkan PIN yang dimasukkan panitia di kiosk dengan PIN event (tersimpan ter-hash).
+     */
+    public function verifyConsumptionPin(string $pin): bool
+    {
+        if (! $this->hasConsumptionKiosk()) {
+            return false;
+        }
+
+        return Hash::check($pin, $this->consumption_pin);
     }
 
     /**

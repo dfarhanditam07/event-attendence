@@ -25,7 +25,7 @@
                             Event Management
                         </span>
                         <span class="text-[10px] font-medium tracking-wide text-slate-500 uppercase">
-                            Presensi Mandiri Peserta
+                            @yield('subtitle', 'Presensi Mandiri Peserta')
                         </span>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                 <!-- Public Footer -->
                 <footer class="mt-12 border-t border-slate-200/80 pt-6 text-center text-xs text-slate-500">
                     <p class="font-medium text-slate-600">
-                        Memerlukan bantuan kehadiran? Silakan hubungi Panitia Acara di meja registrasi.
+                        @yield('footer_hint', 'Memerlukan bantuan kehadiran? Silakan hubungi Panitia Acara di meja registrasi.')
                     </p>
                     <p class="mt-2 text-[11px] text-slate-400">
                         © {{ now()->year }} ENC Corporation • Sistem Presensi Kehadiran Perusahaan. All rights reserved.

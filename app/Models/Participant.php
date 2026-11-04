@@ -18,6 +18,11 @@ class Participant extends Model
     /** @use HasFactory<ParticipantFactory> */
     use HasFactory;
 
+    /**
+     * Label penampung untuk peserta yang tidak punya nilai `organization`.
+     */
+    public const UNASSIGNED_DIVISION = 'Tanpa Divisi';
+
     protected static function booted(): void
     {
         static::creating(function (Participant $participant): void {
@@ -37,6 +42,39 @@ class Participant extends Model
     public function attendance(): HasOne
     {
         return $this->hasOne(Attendance::class);
+    }
+
+    public function consumptionClaim(): HasOne
+    {
+        return $this->hasOne(ConsumptionClaim::class);
+    }
+
+    /**
+     * Nama divisi dari nilai `organization`. Peserta tanpa organisasi dikelompokkan
+     * ke satu penampung "Tanpa Divisi".
+     */
+    public static function normalizeDivision(?string $organization): string
+    {
+        $organization = trim((string) $organization);
+
+        return $organization !== '' ? $organization : self::UNASSIGNED_DIVISION;
+    }
+
+    /**
+     * Filter peserta yang berada di divisi tertentu (lihat normalizeDivision()).
+     *
+     * @param  Builder<Participant>  $query
+     * @return Builder<Participant>
+     */
+    public function scopeInDivision(Builder $query, string $division): Builder
+    {
+        if ($division === self::UNASSIGNED_DIVISION) {
+            return $query->where(fn (Builder $q): Builder => $q
+                ->whereNull('organization')
+                ->orWhereRaw("TRIM(organization) = ''"));
+        }
+
+        return $query->whereRaw('TRIM(organization) = ?', [$division]);
     }
 
     /**

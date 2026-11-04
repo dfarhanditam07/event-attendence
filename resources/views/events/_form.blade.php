@@ -112,6 +112,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Bagian 3: Kiosk Konsumsi -->
+    <div class="pt-2">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-4">
+            Kiosk Konsumsi Publik <span class="text-xs font-normal normal-case text-slate-400">(Opsional)</span>
+        </h3>
+
+        <div class="space-y-4">
+            <div>
+                <label for="consumption_pin" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
+                    PIN Kiosk Konsumsi
+                </label>
+                <input id="consumption_pin" name="consumption_pin" type="text" inputmode="numeric" autocomplete="off"
+                       value="{{ old('consumption_pin') }}"
+                       placeholder="{{ $event->hasConsumptionKiosk() ? 'Kosongkan bila tidak ingin mengubah PIN' : 'Contoh: 4821' }}"
+                       class="{{ $inputClasses }}">
+                @error('consumption_pin')
+                    <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
+                @enderror
+                <p class="mt-1.5 text-xs text-slate-500">
+                    Isi PIN untuk mengaktifkan kiosk pengambilan konsumsi publik di meja pembagian (tanpa login panitia) minimal 4 karakter.
+                </p>
+            </div>
+
+            @if($event->hasConsumptionKiosk())
+                <label class="flex items-start gap-2.5 rounded-lg border border-rose-200/80 bg-rose-50/70 p-3.5 text-xs text-rose-800 cursor-pointer select-none">
+                    <input type="checkbox" name="remove_consumption_pin" value="1"
+                           class="mt-0.5 h-4 w-4 rounded border-rose-300 text-rose-700 focus:ring-rose-500"
+                           @checked(old('remove_consumption_pin'))>
+                    <span class="leading-relaxed">
+                        Nonaktifkan kiosk konsumsi. PIN saat ini akan dihapus dan kiosk publik tidak dapat dibuka.
+                    </span>
+                </label>
+            @endif
+        </div>
+    </div>
 </div>
 
 <div class="mt-8 flex items-center gap-3 border-t border-slate-100 pt-6">
