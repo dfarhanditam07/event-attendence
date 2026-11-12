@@ -65,35 +65,16 @@
                                 <span class="font-semibold text-rose-600">(Wajib)</span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">nik</code>
-                                <span class="text-slate-500">(Opsional, unik per event)</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">email</code>
+                                <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">bisnis_unit</code> / <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">divisi</code>
                                 <span class="text-slate-500">(Opsional)</span>
                             </li>
                             <li class="flex items-center gap-2">
-                                <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">phone</code> / <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">no_hp</code>
-                                <span class="text-slate-500">(Opsional)</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">organization</code> / <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">instansi</code>
+                                <code class="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">jabatan</code>
                                 <span class="text-slate-500">(Opsional)</span>
                             </li>
                         </ul>
                         <div class="mt-3 border-t border-enc-200/60 pt-2 text-[11px] text-slate-600 leading-relaxed">
                             Mendukung pemisah koma (,) maupun titik koma (;) untuk format Excel standar Indonesia. Maksimal 5.000 baris data per unggahan.
-                        </div>
-                    </div>
-
-                    <div class="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5 text-xs text-amber-900 flex items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-none text-amber-700 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                            <line x1="12" y1="9" x2="12" y2="13"/>
-                            <line x1="12" y1="17" x2="12.01" y2="17"/>
-                        </svg>
-                        <div class="leading-relaxed">
-                            <strong>Penting:</strong> Format kolom <code>nik</code> dan <code>phone</code> sebagai <em>Text</em> di Excel sebelum menyimpan CSV agar angka panjang tidak terpotong menjadi format ilmiah (3.2E+15) dan angka 0 di depan tidak hilang.
                         </div>
                     </div>
                 </div>
@@ -133,33 +114,25 @@
                         <thead class="bg-slate-50/80 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">
                             <tr>
                                 <th class="px-3 py-2.5">name</th>
-                                <th class="px-3 py-2.5">nik</th>
-                                <th class="px-3 py-2.5">email</th>
-                                <th class="px-3 py-2.5">phone</th>
-                                <th class="px-3 py-2.5">organization</th>
+                                <th class="px-3 py-2.5">bisnis_unit</th>
+                                <th class="px-3 py-2.5">jabatan</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-slate-700">
                             <tr class="hover:bg-slate-50">
                                 <td class="px-3 py-2.5 font-medium text-slate-900">Budi Santoso</td>
-                                <td class="px-3 py-2.5 font-mono">3201010101900001</td>
-                                <td class="px-3 py-2.5">budi@example.com</td>
-                                <td class="px-3 py-2.5 font-mono">081234567890</td>
-                                <td class="px-3 py-2.5">Kementerian XYZ</td>
+                                <td class="px-3 py-2.5">Divisi Keuangan</td>
+                                <td class="px-3 py-2.5">Manajer</td>
                             </tr>
                             <tr class="hover:bg-slate-50">
                                 <td class="px-3 py-2.5 font-medium text-slate-900">Siti Rahayu</td>
-                                <td class="px-3 py-2.5 font-mono">3201010202900002</td>
-                                <td class="px-3 py-2.5">siti@example.com</td>
-                                <td class="px-3 py-2.5 font-mono">081398765432</td>
-                                <td class="px-3 py-2.5">Dinas ABC</td>
+                                <td class="px-3 py-2.5">Divisi SDM</td>
+                                <td class="px-3 py-2.5">Staf</td>
                             </tr>
                             <tr class="hover:bg-slate-50">
                                 <td class="px-3 py-2.5 font-medium text-slate-900">Ahmad Fadli</td>
-                                <td class="px-3 py-2.5 font-mono">3201010303900003</td>
-                                <td class="px-3 py-2.5">ahmad@perusahaan.co.id</td>
-                                <td class="px-3 py-2.5 font-mono">081812345678</td>
-                                <td class="px-3 py-2.5">PT Mitra Sinergi</td>
+                                <td class="px-3 py-2.5">Divisi IT</td>
+                                <td class="px-3 py-2.5">Supervisor</td>
                             </tr>
                         </tbody>
                     </table>
@@ -167,7 +140,7 @@
             </div>
 
             <div class="mt-6 rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-xs text-slate-500">
-                <span class="font-semibold text-slate-700">Tips Import:</span> Sistem secara otomatis mendeteksi dan mengabaikan baris kosong, serta memvalidasi nomor NIK unik di dalam event.
+                <span class="font-semibold text-slate-700">Tips Import:</span> Sistem secara otomatis mendeteksi dan mengabaikan baris kosong.
             </div>
         </div>
     </div>
@@ -208,7 +181,7 @@
                                 <td class="px-4 py-3 font-mono font-bold text-amber-800">#{{ $fail['row'] }}</td>
                                 <td class="px-4 py-3">
                                     <div class="space-y-0.5">
-                                        @foreach(['name','nik','email','phone','organization'] as $k)
+                                        @foreach(['name','bisnis_unit','jabatan'] as $k)
                                             @if(filled($fail['data'][$k] ?? null))
                                                 <div>
                                                     <span class="font-medium text-slate-500">{{ $k }}:</span>

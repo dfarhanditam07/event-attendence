@@ -10,17 +10,13 @@ use App\Http\Controllers\PublicConsumptionController;
 use Illuminate\Support\Facades\Route;
 
 // Halaman publik (TANPA login) — satu-satunya tempat check-in, dipakai peserta sendiri.
-// Metode: input NIK atau cari nama. Slug diulang sebagai segment kedua supaya ID tidak bisa ditebak.
+// Metode: cari nama lalu pilih. Slug diulang sebagai segment kedua supaya ID tidak bisa ditebak.
 Route::prefix('e/{event}/{slug}')
     ->name('public.events.')
     ->middleware('throttle:public-check-in')
     ->group(function () {
-        Route::get('/', [PublicCheckInController::class, 'welcome'])->name('check-in');
-        Route::get('check-in/{mode}', [PublicCheckInController::class, 'form'])
-            ->whereIn('mode', ['nik', 'name'])
-            ->name('check-in.mode');
-        Route::post('submit/nik', [PublicCheckInController::class, 'submitNik'])->name('check-in.submit-nik');
-        Route::post('submit/name', [PublicCheckInController::class, 'submitName'])->name('check-in.submit-name');
+        Route::get('/', [PublicCheckInController::class, 'form'])->name('check-in');
+        Route::post('submit', [PublicCheckInController::class, 'submitName'])->name('check-in.submit');
     });
 
 // Kiosk konsumsi di meja pembagian (TANPA login), dilindungi PIN per event.

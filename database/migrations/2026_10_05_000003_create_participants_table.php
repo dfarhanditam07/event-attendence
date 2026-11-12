@@ -12,15 +12,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('nik', 32)->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone', 32)->nullable();
-            $table->string('organization')->nullable();
+            $table->string('bisnis_unit')->nullable();
+            $table->string('jabatan')->nullable();
             $table->string('qr_token', 64)->unique();
             $table->timestamps();
 
-            // NIK boleh kosong, tapi kalau diisi harus unik di dalam satu event.
-            $table->unique(['event_id', 'nik']);
+            // Indeks disesuaikan untuk pencarian berdasarkan event dan nama
             $table->index(['event_id', 'name']);
         });
     }

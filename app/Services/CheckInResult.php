@@ -41,7 +41,7 @@ class CheckInResult
         return [
             'success' => $this->success,
             'participant_name' => $this->participant?->name,
-            'participant_organization' => $this->participant?->organization,
+            'participant_bisnis_unit' => $this->participant?->bisnis_unit,
             'checked_in_at' => $this->attendance?->checked_in_at?->translatedFormat('d M Y, H:i:s'),
             'method_label' => $this->attendance?->method->label(),
             'errors' => $this->errors,

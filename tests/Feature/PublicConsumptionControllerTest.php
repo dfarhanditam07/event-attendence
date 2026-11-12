@@ -27,18 +27,18 @@ class PublicConsumptionControllerTest extends TestCase
         return ['event' => $event, 'slug' => $event->slug];
     }
 
-    private function presentParticipant(Event $event, ?string $organization, string $name): Participant
+    private function presentParticipant(Event $event, ?string $bisnisUnit, string $name): Participant
     {
         $participant = Participant::factory()->for($event)->create([
             'name' => $name,
-            'organization' => $organization,
+            'bisnis_unit' => $bisnisUnit,
         ]);
 
         Attendance::create([
             'event_id' => $event->id,
             'participant_id' => $participant->id,
             'checked_in_at' => now(),
-            'method' => AttendanceMethod::Nik,
+            'method' => AttendanceMethod::Name,
         ]);
 
         return $participant;
@@ -124,7 +124,7 @@ class PublicConsumptionControllerTest extends TestCase
         $event = Event::factory()->create(['consumption_pin' => self::PIN]);
         $presentA = $this->presentParticipant($event, 'Divisi IT', 'Andi');
         $presentB = $this->presentParticipant($event, 'Divisi IT', 'Budi');
-        $absent = Participant::factory()->for($event)->create(['organization' => 'Divisi IT', 'name' => 'Cici']);
+        $absent = Participant::factory()->for($event)->create(['bisnis_unit' => 'Divisi IT', 'name' => 'Cici']);
 
         $this->post(route('public.events.consumption.unlock', $this->kioskParams($event)), ['pin' => self::PIN]);
 

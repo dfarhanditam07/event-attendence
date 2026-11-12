@@ -46,7 +46,7 @@
                         <thead class="bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
                             <tr>
                                 <th class="px-5 py-3.5">Nama</th>
-                                <th class="px-5 py-3.5">NIK</th>
+                                <th class="px-5 py-3.5">Jabatan</th>
                                 <th class="px-5 py-3.5">Waktu Check-in</th>
                             </tr>
                         </thead>
@@ -54,7 +54,7 @@
                             @foreach($participants as $participant)
                                 <tr class="transition-colors hover:bg-slate-50/80">
                                     <td class="px-5 py-3.5 font-semibold text-slate-900">{{ $participant->name }}</td>
-                                    <td class="px-5 py-3.5 font-mono text-xs text-slate-600">{{ $participant->nik ?: '—' }}</td>
+                                    <td class="px-5 py-3.5 text-xs text-slate-600">{{ $participant->jabatan ?: '—' }}</td>
                                     <td class="px-5 py-3.5 text-xs text-slate-600">
                                         {{ $participant->attendance?->checked_in_at?->translatedFormat('d M Y, H:i') ?? '—' }}
                                     </td>

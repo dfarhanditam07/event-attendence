@@ -117,7 +117,7 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari nama, NIK, atau organisasi..."
+                    placeholder="Cari nama, bisnis unit, atau jabatan..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-enc-600 focus:outline-none focus:ring-2 focus:ring-enc-600/10">
             </div>
 
@@ -184,7 +184,7 @@
                         <tr>
                             <th class="px-5 py-3.5">Waktu Check-in</th>
                             <th class="px-5 py-3.5">Peserta</th>
-                            <th class="px-5 py-3.5">NIK & Instansi</th>
+                            <th class="px-5 py-3.5">Bisnis Unit & Jabatan</th>
                             <th class="px-5 py-3.5">Metode Check-in</th>
                         </tr>
                     </thead>
@@ -197,21 +197,6 @@
                                     ->take(2)
                                     ->map(fn($w) => strtoupper(substr($w, 0, 1)))
                                     ->implode('');
-
-                                $badge = match($a->method) {
-                                    \App\Enums\AttendanceMethod::Nik => [
-                                        'class' => 'bg-sky-50 text-sky-800 border-sky-200/90',
-                                        'label' => 'Input NIK',
-                                    ],
-                                    \App\Enums\AttendanceMethod::Name => [
-                                        'class' => 'bg-amber-50 text-amber-800 border-amber-200/90',
-                                        'label' => 'Cari Nama',
-                                    ],
-                                    default => [
-                                        'class' => 'bg-slate-100 text-slate-700 border-slate-200',
-                                        'label' => $a->method->label(),
-                                    ],
-                                };
                             @endphp
                             <tr class="transition-colors hover:bg-slate-50/80">
                                 <td class="whitespace-nowrap px-5 py-3.5 text-slate-600">
@@ -225,38 +210,30 @@
                                         </span>
                                         <div>
                                             <div class="font-semibold text-slate-900">{{ $name }}</div>
-                                            @if($a->participant?->email)
-                                                <div class="text-[11px] text-slate-400">{{ $a->participant->email }}</div>
+                                            @if($a->participant?->bisnis_unit)
+                                                <div class="text-[11px] text-slate-400">{{ $a->participant->bisnis_unit }}</div>
                                             @endif
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-5 py-3.5 text-slate-600">
-                                    @if($a->participant?->nik)
-                                        <div class="font-mono text-xs font-medium text-slate-800">{{ $a->participant->nik }}</div>
+                                    @if($a->participant?->bisnis_unit)
+                                        <div class="text-xs font-medium text-slate-800">{{ $a->participant->bisnis_unit }}</div>
                                     @endif
-                                    @if($a->participant?->organization)
-                                        <div class="text-xs text-slate-500">{{ $a->participant->organization }}</div>
+                                    @if($a->participant?->jabatan)
+                                        <div class="text-xs text-slate-500">{{ $a->participant->jabatan }}</div>
                                     @endif
-                                    @if(!$a->participant?->nik && !$a->participant?->organization)
+                                    @if(!$a->participant?->bisnis_unit && !$a->participant?->jabatan)
                                         <span class="text-xs text-slate-400">—</span>
                                     @endif
                                 </td>
                                 <td class="whitespace-nowrap px-5 py-3.5">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold {{ $badge['class'] }}">
-                                        @if($a->method === \App\Enums\AttendanceMethod::Nik)
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="3" y="4" width="18" height="16" rx="2"/>
-                                                <line x1="7" y1="8" x2="17" y2="8"/>
-                                                <line x1="7" y1="12" x2="11" y2="12"/>
-                                            </svg>
-                                        @elseif($a->method === \App\Enums\AttendanceMethod::Name)
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <circle cx="11" cy="11" r="8"/>
-                                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                                            </svg>
-                                        @endif
-                                        {{ $badge['label'] }}
+                                    <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200/90 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"/>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                        </svg>
+                                        {{ $a->method->label() }}
                                     </span>
                                 </td>
                             </tr>

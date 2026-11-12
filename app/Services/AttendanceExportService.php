@@ -37,10 +37,8 @@ class AttendanceExportService
             fputcsv($handle, [
                 'No',
                 'Nama',
-                'NIK',
-                'Email',
-                'No. HP',
-                'Organisasi',
+                'Bisnis Unit',
+                'Jabatan',
                 'Status Kehadiran',
                 'Waktu Check-in',
                 'Metode Check-in',
@@ -60,10 +58,8 @@ class AttendanceExportService
                 fputcsv($handle, [
                     $i,
                     $this->safe($p->name),
-                    $this->safe($p->nik),
-                    $this->safe($p->email),
-                    $this->safe($p->phone),
-                    $this->safe($p->organization),
+                    $this->safe($p->bisnis_unit),
+                    $this->safe($p->jabatan),
                     $attendance ? 'Hadir' : 'Belum Hadir',
                     $attendance?->checked_in_at
                         ? Carbon::parse($attendance->checked_in_at)->translatedFormat('d M Y, H:i')

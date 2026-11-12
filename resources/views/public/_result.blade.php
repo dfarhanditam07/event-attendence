@@ -14,9 +14,9 @@
                     <div class="mt-0.5 text-base font-bold text-emerald-950">
                         {{ $lastResult['participant_name'] }}
                     </div>
-                    @if(!empty($lastResult['participant_organization']))
+                    @if(!empty($lastResult['participant_bisnis_unit']))
                         <div class="text-xs font-medium text-emerald-800">
-                            {{ $lastResult['participant_organization'] }}
+                            {{ $lastResult['participant_bisnis_unit'] }}
                         </div>
                     @endif
 

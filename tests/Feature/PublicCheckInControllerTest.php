@@ -22,16 +22,16 @@ class PublicCheckInControllerTest extends TestCase
         return ['event' => $event, 'slug' => $event->slug];
     }
 
-    public function test_welcome_page_only_offers_name_and_nik_check_in(): void
+    public function test_check_in_page_only_offers_name_search(): void
     {
         $event = Event::factory()->create();
 
         $this->get(route('public.events.check-in', $this->publicParams($event)))
             ->assertOk()
-            ->assertSee('Cari Nama')
-            ->assertSee('Input NIK')
+            ->assertSee('Cari Nama Peserta')
             ->assertDontSee('Scan QR')
-            ->assertDontSee('Manual');
+            ->assertDontSee('Input NIK')
+            ->assertDontSee('Check-in dengan NIK');
     }
 
     public function test_wrong_slug_returns_404(): void
@@ -42,7 +42,7 @@ class PublicCheckInControllerTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_unknown_check_in_mode_returns_404(): void
+    public function test_unknown_check_in_path_returns_404(): void
     {
         $event = Event::factory()->create();
 
@@ -50,28 +50,29 @@ class PublicCheckInControllerTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_closed_event_hides_check_in_forms(): void
+    public function test_closed_event_hides_check_in_form(): void
     {
         $event = Event::factory()->closed()->create();
 
         $this->get(route('public.events.check-in', $this->publicParams($event)))
             ->assertOk()
-            ->assertSee('Check-in sudah ditutup')
-            ->assertDontSee('Cari Nama');
+            ->assertSee('Sesi Presensi Telah Ditutup')
+            ->assertDontSee('Cari Nama Peserta');
     }
 
-    public function test_draft_event_hides_check_in_forms_and_rejects_submit(): void
+    public function test_draft_event_hides_check_in_form_and_rejects_submit(): void
     {
         $event = Event::factory()->draft()->create();
-        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+        $participant = Participant::factory()->for($event)->create();
 
         $this->get(route('public.events.check-in', $this->publicParams($event)))
             ->assertOk()
-            ->assertSee('Check-in belum dibuka')
-            ->assertDontSee('Cari Nama');
+            ->assertSee('Sesi Presensi Belum Dibuka')
+            ->assertDontSee('Cari Nama Peserta');
 
-        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
-            'nik' => '3201010101900001',
+        $this->post(route('public.events.check-in.submit', $this->publicParams($event)), [
+            'participant_id' => $participant->id,
+            'confirmation' => '1',
         ])->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === false);
 
         $this->assertDatabaseMissing('attendances', ['participant_id' => $participant->id]);
@@ -83,16 +84,16 @@ class PublicCheckInControllerTest extends TestCase
             'starts_at' => now()->subHours(5),
             'ends_at' => now()->subHour(),
         ]);
-        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+        $participant = Participant::factory()->for($event)->create();
 
         $this->get(route('public.events.check-in', $this->publicParams($event)))
             ->assertOk()
-            ->assertSee('Check-in sudah ditutup')
-            ->assertSee('Ditutup')
-            ->assertDontSee('Cari Nama');
+            ->assertSee('Sesi Presensi Telah Ditutup')
+            ->assertDontSee('Cari Nama Peserta');
 
-        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
-            'nik' => '3201010101900001',
+        $this->post(route('public.events.check-in.submit', $this->publicParams($event)), [
+            'participant_id' => $participant->id,
+            'confirmation' => '1',
         ])->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === false);
 
         $this->assertDatabaseMissing('attendances', ['participant_id' => $participant->id]);
@@ -104,10 +105,11 @@ class PublicCheckInControllerTest extends TestCase
             'starts_at' => now()->subHour(),
             'ends_at' => now()->addHour(),
         ]);
-        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+        $participant = Participant::factory()->for($event)->create();
 
-        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
-            'nik' => '3201010101900001',
+        $this->post(route('public.events.check-in.submit', $this->publicParams($event)), [
+            'participant_id' => $participant->id,
+            'confirmation' => '1',
         ])->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === true);
 
         $this->assertDatabaseHas('attendances', ['participant_id' => $participant->id]);
@@ -122,40 +124,55 @@ class PublicCheckInControllerTest extends TestCase
 
         $this->get(route('public.events.check-in', $this->publicParams($event)))
             ->assertOk()
-            ->assertSee('Cari Nama');
+            ->assertSee('Cari Nama Peserta');
     }
 
     public function test_name_search_requires_three_characters(): void
     {
         $event = Event::factory()->create();
 
-        $this->get(route('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'name', 'q' => 'ab']))
+        $this->get(route('public.events.check-in', [...$this->publicParams($event), 'q' => 'ab']))
             ->assertOk()
-            ->assertSee('Ketik minimal 3 huruf nama Anda.');
+            ->assertSee('minimal 3 huruf');
     }
 
-    public function test_name_search_masks_nik_and_does_not_show_full_nik(): void
+    public function test_name_search_lists_candidates_with_bisnis_unit_and_jabatan(): void
     {
         $event = Event::factory()->create();
         Participant::factory()->for($event)->create([
             'name' => 'Budi Santoso',
-            'nik' => '3201010101900001',
+            'bisnis_unit' => 'Divisi Keuangan',
+            'jabatan' => 'Manajer',
         ]);
 
-        $this->get(route('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'name', 'q' => 'Budi']))
+        $this->get(route('public.events.check-in', [...$this->publicParams($event), 'q' => 'Budi']))
             ->assertOk()
             ->assertSee('Budi Santoso')
-            ->assertSee('************0001')
-            ->assertDontSee('3201010101900001');
+            ->assertSee('Divisi Keuangan')
+            ->assertSee('Manajer');
+    }
+
+    public function test_name_search_does_not_offer_participants_who_already_checked_in(): void
+    {
+        $event = Event::factory()->create();
+        Participant::factory()->for($event)->create(['name' => 'Budi Santoso']);
+
+        $this->post(route('public.events.check-in.submit', $this->publicParams($event)), [
+            'participant_id' => Participant::sole()->id,
+            'confirmation' => '1',
+        ]);
+
+        $this->get(route('public.events.check-in', [...$this->publicParams($event), 'q' => 'Budi']))
+            ->assertOk()
+            ->assertSee('tidak ditemukan');
     }
 
     public function test_name_search_escapes_html_in_the_query(): void
     {
         $event = Event::factory()->create();
 
-        $this->get(route('public.events.check-in.mode', [
+        $this->get(route('public.events.check-in', [
             ...$this->publicParams($event),
-            'mode' => 'name',
             'q' => '<script>alert(1)</script>',
         ]))
             ->assertOk()
@@ -163,59 +180,36 @@ class PublicCheckInControllerTest extends TestCase
             ->assertDontSee('<script>alert(1)</script>', false);
     }
 
-    public function test_check_in_by_nik_records_attendance(): void
-    {
-        $this->freezeTime();
-
-        $event = Event::factory()->create();
-        $participant = Participant::factory()->for($event)->create([
-            'nik' => '32.01.01.01.0190.0001',
-        ]);
-
-        $this->assertSame('3201010101900001', $participant->fresh()->nik);
-
-        $this->from(route('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'nik']))
-            ->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
-                'nik' => '3201 0101 0190 0001',
-            ])
-            ->assertRedirectToRoute('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'nik'])
-            ->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === true);
-
-        $this->assertDatabaseHas('attendances', [
-            'event_id' => $event->id,
-            'participant_id' => $participant->id,
-            'method' => AttendanceMethod::Nik->value,
-            'checked_in_by' => null,
-        ]);
-    }
-
     public function test_check_in_by_name_records_attendance(): void
     {
         $event = Event::factory()->create();
         $participant = Participant::factory()->for($event)->create(['name' => 'Siti Aminah']);
 
-        $this->from(route('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'name', 'q' => 'Siti']))
-            ->post(route('public.events.check-in.submit-name', $this->publicParams($event)), [
+        $this->from(route('public.events.check-in', [...$this->publicParams($event), 'q' => 'Siti']))
+            ->post(route('public.events.check-in.submit', $this->publicParams($event)), [
                 'participant_id' => $participant->id,
                 'confirmation' => '1',
             ])
-            ->assertRedirectToRoute('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'name'])
+            ->assertRedirectToRoute('public.events.check-in', $this->publicParams($event))
             ->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === true);
 
         $this->assertDatabaseHas('attendances', [
             'event_id' => $event->id,
             'participant_id' => $participant->id,
             'method' => AttendanceMethod::Name->value,
+            'checked_in_by' => null,
         ]);
     }
 
-    public function test_duplicate_nik_check_in_does_not_create_a_second_row(): void
+    public function test_duplicate_check_in_does_not_create_a_second_row(): void
     {
         $event = Event::factory()->create();
-        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+        $participant = Participant::factory()->for($event)->create(['name' => 'Siti Aminah']);
 
-        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), ['nik' => '3201010101900001']);
-        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), ['nik' => '3201010101900001'])
+        $payload = ['participant_id' => $participant->id, 'confirmation' => '1'];
+
+        $this->post(route('public.events.check-in.submit', $this->publicParams($event)), $payload);
+        $this->post(route('public.events.check-in.submit', $this->publicParams($event)), $payload)
             ->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === false);
 
         $this->assertDatabaseCount('attendances', 1);
@@ -227,8 +221,8 @@ class PublicCheckInControllerTest extends TestCase
         $event = Event::factory()->create();
         $other = Participant::factory()->create();
 
-        $this->from(route('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'name']))
-            ->post(route('public.events.check-in.submit-name', $this->publicParams($event)), [
+        $this->from(route('public.events.check-in', $this->publicParams($event)))
+            ->post(route('public.events.check-in.submit', $this->publicParams($event)), [
                 'participant_id' => $other->id,
                 'confirmation' => '1',
             ])
@@ -240,22 +234,27 @@ class PublicCheckInControllerTest extends TestCase
     public function test_closed_event_rejects_check_in_submit(): void
     {
         $event = Event::factory()->closed()->create();
-        $participant = Participant::factory()->for($event)->create(['nik' => '3201010101900001']);
+        $participant = Participant::factory()->for($event)->create();
 
-        $this->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), [
-            'nik' => '3201010101900001',
+        $this->post(route('public.events.check-in.submit', $this->publicParams($event)), [
+            'participant_id' => $participant->id,
+            'confirmation' => '1',
         ])->assertSessionHas('public_check_in_result', fn (array $result): bool => $result['success'] === false);
 
         $this->assertDatabaseMissing('attendances', ['participant_id' => $participant->id]);
     }
 
-    public function test_nik_check_in_requires_nik(): void
+    public function test_check_in_submit_requires_participant_and_confirmation(): void
     {
         $event = Event::factory()->create();
 
-        $this->from(route('public.events.check-in.mode', [...$this->publicParams($event), 'mode' => 'nik']))
-            ->post(route('public.events.check-in.submit-nik', $this->publicParams($event)), ['nik' => ''])
-            ->assertSessionHasErrors(['nik' => 'NIK wajib diisi.']);
+        $this->from(route('public.events.check-in', $this->publicParams($event)))
+            ->post(route('public.events.check-in.submit', $this->publicParams($event)), [
+                'participant_id' => '',
+            ])
+            ->assertSessionHasErrors(['participant_id', 'confirmation']);
+
+        $this->assertDatabaseCount('attendances', 0);
     }
 
     public function test_committee_check_in_routes_are_gone(): void

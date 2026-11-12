@@ -97,7 +97,7 @@
                             @foreach($pickup->claims as $claim)
                                 <li class="flex items-center justify-between px-5 py-2.5 text-sm">
                                     <span class="font-medium text-slate-800">{{ $claim->participant?->name ?? '(peserta telah dihapus)' }}</span>
-                                    <span class="text-xs text-slate-500">{{ $claim->participant?->organization ?: '—' }}</span>
+                                    <span class="text-xs text-slate-500">{{ $claim->participant?->bisnis_unit ?: '—' }}</span>
                                 </li>
                             @endforeach
                         </ul>

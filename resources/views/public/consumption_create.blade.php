@@ -34,7 +34,7 @@
                     <li class="flex items-center justify-between gap-3 px-5 py-3">
                         <div class="min-w-0">
                             <div class="truncate text-sm font-semibold text-slate-900">{{ $participant->name }}</div>
-                            <div class="mt-0.5 font-mono text-[11px] text-slate-500">{{ $participant->nik ?: '—' }}</div>
+                            <div class="mt-0.5 text-[11px] text-slate-500">{{ $participant->jabatan ?: '—' }}</div>
                         </div>
                         <span class="flex-none text-[11px] text-slate-400">
                             {{ $participant->attendance?->checked_in_at?->translatedFormat('H:i') ?? '' }}

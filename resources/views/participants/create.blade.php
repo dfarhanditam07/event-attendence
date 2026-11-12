@@ -49,71 +49,42 @@
                                 <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        <div>
-                            <label for="nik" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                Nomor Induk Karyawan (NIK) <span class="text-xs font-normal normal-case text-slate-400">(Opsional)</span>
-                            </label>
-                            <input id="nik" name="nik" type="text" inputmode="numeric"
-                                   value="{{ old('nik', $participant->nik) }}"
-                                   placeholder="Contoh: 3201010101900001 / EN-10492"
-                                   class="{{ $inputClasses }}">
-                            <p class="mt-1.5 text-xs text-slate-500">
-                                Jika diisi, NIK harus unik untuk setiap peserta dalam event ini.
-                            </p>
-                            @error('nik')
-                                <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
                 </div>
 
-                <!-- Section 2: Kontak & Lembaga -->
+                <!-- Section 2: Bisnis Unit & Jabatan -->
                 <div class="pt-2">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2 mb-4">
-                        Kontak & Instansi
+                        Bisnis Unit & Jabatan
                     </h3>
 
                     <div class="space-y-4">
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <label for="phone" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    No. HP / WhatsApp <span class="text-xs font-normal normal-case text-slate-400">(Opsional)</span>
+                                <label for="bisnis_unit" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
+                                    Bisnis Unit / Divisi <span class="text-xs font-normal normal-case text-slate-400">(Opsional)</span>
                                 </label>
-                                <input id="phone" name="phone" type="tel"
-                                       value="{{ old('phone', $participant->phone) }}"
-                                       placeholder="Contoh: 081234567890"
+                                <input id="bisnis_unit" name="bisnis_unit" type="text"
+                                       value="{{ old('bisnis_unit', $participant->bisnis_unit) }}"
+                                       placeholder="Contoh: Divisi Keuangan"
                                        class="{{ $inputClasses }}">
-                                @error('phone')
+                                @error('bisnis_unit')
                                     <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label for="email" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                    Alamat Email <span class="text-xs font-normal normal-case text-slate-400">(Opsional)</span>
+                                <label for="jabatan" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
+                                    Jabatan <span class="text-xs font-normal normal-case text-slate-400">(Opsional)</span>
                                 </label>
-                                <input id="email" name="email" type="email"
-                                       value="{{ old('email', $participant->email) }}"
-                                       placeholder="Contoh: budi.santoso@perusahaan.com"
+                                <input id="jabatan" name="jabatan" type="text"
+                                       value="{{ old('jabatan', $participant->jabatan) }}"
+                                       placeholder="Contoh: Manajer Operasional"
                                        class="{{ $inputClasses }}">
-                                @error('email')
+                                @error('jabatan')
                                     <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                        </div>
-
-                        <div>
-                            <label for="organization" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                                Instansi / Departemen / Perusahaan <span class="text-xs font-normal normal-case text-slate-400">(Opsional)</span>
-                            </label>
-                            <input id="organization" name="organization" type="text"
-                                   value="{{ old('organization', $participant->organization) }}"
-                                   placeholder="Contoh: Divisi Keuangan / PT Mitra Sejahtera"
-                                   class="{{ $inputClasses }}">
-                            @error('organization')
-                                <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
-                            @enderror
                         </div>
                     </div>
                 </div>

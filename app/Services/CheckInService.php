@@ -11,36 +11,11 @@ use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 
 /**
- * Check-in peserta. Hanya dua cara: input NIK, atau pilih nama dari hasil pencarian.
+ * Check-in peserta. Peserta memilih namanya sendiri dari hasil pencarian.
  * Satu peserta hanya bisa check-in sekali (dijaga juga oleh UNIQUE di database).
  */
 class CheckInService
 {
-    public function checkInByNik(Event $event, string $nik, ?User $checkedInBy = null): CheckInResult
-    {
-        if ($blocked = $this->guardEvent($event)) {
-            return $blocked;
-        }
-
-        $nik = Participant::normalizeNik($nik);
-
-        if ($nik === null) {
-            return CheckInResult::fail(['nik' => ['NIK wajib diisi.']]);
-        }
-
-        $participant = Participant::where('event_id', $event->id)
-            ->whereRaw('LOWER(nik) = ?', [mb_strtolower($nik)])
-            ->first();
-
-        if (! $participant) {
-            return CheckInResult::fail([
-                '_participant' => ['NIK tidak ditemukan di event ini. Periksa kembali atau hubungi panitia.'],
-            ]);
-        }
-
-        return $this->persist($event, $participant, AttendanceMethod::Nik, $checkedInBy);
-    }
-
     public function checkInByName(Event $event, int $participantId, ?User $checkedInBy = null): CheckInResult
     {
         if ($blocked = $this->guardEvent($event)) {

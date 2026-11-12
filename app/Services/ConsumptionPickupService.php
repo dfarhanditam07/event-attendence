@@ -51,7 +51,7 @@ class ConsumptionPickupService
      * Rekap per divisi: total hadir, sudah diambil, dan sisa porsi.
      *
      * Satu query agregat (JOIN attendances + LEFT JOIN claims) supaya tidak N+1.
-     * Pengelompokan dilakukan pada kolom `organization` apa adanya, lalu label divisi
+     * Pengelompokan dilakukan pada kolom `bisnis_unit` apa adanya, lalu label divisi
      * dinormalkan di PHP (lihat Participant::normalizeDivision()) agar variasi
      * spasi/kosong tetap masuk ke satu baris.
      *
@@ -63,12 +63,12 @@ class ConsumptionPickupService
             ->join('attendances', 'attendances.participant_id', '=', 'participants.id')
             ->leftJoin('consumption_claims', 'consumption_claims.participant_id', '=', 'participants.id')
             ->where('participants.event_id', $event->id)
-            ->groupBy('participants.organization')
-            ->select('participants.organization')
+            ->groupBy('participants.bisnis_unit')
+            ->select('participants.bisnis_unit')
             ->selectRaw('COUNT(participants.id) AS present_count')
             ->selectRaw('COUNT(consumption_claims.id) AS claimed_count')
             ->get()
-            ->groupBy(fn (object $row): string => Participant::normalizeDivision($row->organization))
+            ->groupBy(fn (object $row): string => Participant::normalizeDivision($row->bisnis_unit))
             ->map(function (Collection $rows, string $division): array {
                 $present = (int) $rows->sum('present_count');
                 $claimed = (int) $rows->sum('claimed_count');

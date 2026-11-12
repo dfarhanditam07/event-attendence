@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('consumption_pickups', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->cascadeOnDelete();
-            // Nama divisi (snapshot nilai `organization` peserta) saat penyerahan dilakukan,
+            // Nama divisi (snapshot nilai `bisnis_unit` peserta) saat penyerahan dilakukan,
             // supaya riwayat tetap utuh walau data peserta diubah kemudian.
             $table->string('division');
             $table->string('representative_name');

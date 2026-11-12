@@ -33,8 +33,8 @@ class AttendanceController extends Controller
             $query->whereHas('participant', function ($q) use ($like): void {
                 $q->where(function ($q) use ($like): void {
                     $q->whereRaw('LOWER(name) LIKE ?', [$like])
-                        ->orWhereRaw('LOWER(nik) LIKE ?', [$like])
-                        ->orWhereRaw('LOWER(organization) LIKE ?', [$like]);
+                        ->orWhereRaw('LOWER(bisnis_unit) LIKE ?', [$like])
+                        ->orWhereRaw('LOWER(jabatan) LIKE ?', [$like]);
                 });
             });
         }
@@ -49,7 +49,7 @@ class AttendanceController extends Controller
         return view('attendances.index', [
             'event' => $event,
             'attendances' => $attendances,
-            'methods' => AttendanceMethod::active(),
+            'methods' => AttendanceMethod::cases(),
             'filters' => [
                 'q' => $search,
                 'method' => $method,

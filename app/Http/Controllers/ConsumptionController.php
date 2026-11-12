@@ -89,7 +89,7 @@ class ConsumptionController extends Controller
         Gate::authorize('view', $event);
 
         $pickups = $event->consumptionPickups()
-            ->with(['claims.participant:id,name,organization', 'handedOverBy:id,name'])
+            ->with(['claims.participant:id,name,bisnis_unit', 'handedOverBy:id,name'])
             ->withCount('claims')
             ->orderByDesc('picked_up_at')
             ->orderByDesc('id')

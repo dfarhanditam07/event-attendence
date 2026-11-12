@@ -27,7 +27,7 @@ class AttendanceControllerTest extends TestCase
         $this->actingAs($staff)
             ->get(route('events.attendances.index', $event))
             ->assertOk()
-            ->assertSee('Daftar kehadiran')
+            ->assertSee('Daftar Kehadiran')
             ->assertDontSee('Konfirmasi Hadir')
             ->assertDontSee('Scan QR')
             ->assertDontSee('Cari nama Anda')
@@ -43,7 +43,7 @@ class AttendanceControllerTest extends TestCase
         $this->actingAs($staff)
             ->get(route('events.show', $event))
             ->assertOk()
-            ->assertSee('Link Check-in Publik')
+            ->assertSee('Portal Check-in Mandiri Peserta')
             ->assertSee($publicUrl)
             ->assertDontSee('Konfirmasi Hadir')
             ->assertDontSee('Scan QR');

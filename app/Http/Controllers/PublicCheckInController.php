@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckInByNameRequest;
-use App\Http\Requests\CheckInByNikRequest;
 use App\Http\Requests\ParticipantPublicSearchRequest;
 use App\Models\Event;
 use App\Models\Participant;
@@ -14,53 +13,41 @@ use Illuminate\View\View;
 
 /**
  * Halaman check-in untuk peserta (tanpa login). Satu-satunya tempat check-in.
- * Metode: input NIK, atau cari nama lalu pilih.
+ * Peserta mencari namanya sendiri lalu memilih datanya dari hasil pencarian.
  */
 class PublicCheckInController extends Controller
 {
     private const MIN_NAME_SEARCH_LENGTH = 3;
 
-    public function welcome(Event $event, string $slug): View
+    public function form(Event $event, string $slug, ParticipantPublicSearchRequest $request): View
     {
         $this->ensureSlug($event, $slug);
-
-        return view('public.check_in_welcome', [
-            'event' => $event,
-            'canCheckIn' => $event->allowsCheckIn(),
-        ]);
-    }
-
-    public function form(Event $event, string $slug, string $mode, ParticipantPublicSearchRequest $request): View
-    {
-        $this->ensureSlug($event, $slug);
-        abort_unless(in_array($mode, ['nik', 'name'], true), 404);
 
         $search = '';
         $candidates = collect();
 
-        if ($mode === 'name' && $event->allowsCheckIn()) {
+        if ($event->allowsCheckIn()) {
             $search = trim((string) $request->validated('q'));
 
             if ($this->searchLength($search) >= self::MIN_NAME_SEARCH_LENGTH) {
-                // Hanya cocokkan NAMA. NIK ditampilkan dalam bentuk tersamar, tidak pernah lengkap.
+                // Hanya cocokkan NAMA. Bisnis unit & jabatan ditampilkan untuk membantu peserta memilih.
                 $candidates = $event->participants()
                     ->nameMatches($search)
                     ->doesntHave('attendance')
                     ->orderByRaw('LOWER(name) ASC')
                     ->limit(10)
-                    ->get(['id', 'event_id', 'name', 'nik', 'organization'])
+                    ->get(['id', 'event_id', 'name', 'bisnis_unit', 'jabatan'])
                     ->map(fn (Participant $p): array => [
                         'id' => $p->id,
                         'name' => $p->name,
-                        'nik_masked' => $p->maskedNik(),
-                        'organization' => $p->organization,
+                        'bisnis_unit' => $p->bisnis_unit,
+                        'jabatan' => $p->jabatan,
                     ]);
             }
         }
 
         return view('public.check_in', [
             'event' => $event,
-            'mode' => $mode,
             'search' => $search,
             'searchTooShort' => $search !== '' && $this->searchLength($search) < self::MIN_NAME_SEARCH_LENGTH,
             'candidates' => $candidates,
@@ -69,22 +56,13 @@ class PublicCheckInController extends Controller
         ]);
     }
 
-    public function submitNik(CheckInByNikRequest $request, Event $event, string $slug, CheckInService $service): RedirectResponse
-    {
-        $this->ensureSlug($event, $slug);
-
-        $result = $service->checkInByNik($event, $request->string('nik')->value());
-
-        return $this->backWithResult($event, 'nik', $result);
-    }
-
     public function submitName(CheckInByNameRequest $request, Event $event, string $slug, CheckInService $service): RedirectResponse
     {
         $this->ensureSlug($event, $slug);
 
         $result = $service->checkInByName($event, (int) $request->validated('participant_id'));
 
-        return $this->backWithResult($event, 'name', $result);
+        return $this->backWithResult($event, $result);
     }
 
     private function ensureSlug(Event $event, string $slug): void
@@ -97,10 +75,10 @@ class PublicCheckInController extends Controller
         return mb_strlen(trim(str_replace(['%', '_', '\\'], '', $term)));
     }
 
-    private function backWithResult(Event $event, string $mode, CheckInResult $result): RedirectResponse
+    private function backWithResult(Event $event, CheckInResult $result): RedirectResponse
     {
         return redirect()
-            ->route('public.events.check-in.mode', ['event' => $event, 'slug' => $event->slug, 'mode' => $mode])
+            ->route('public.events.check-in', ['event' => $event, 'slug' => $event->slug])
             ->with('public_check_in_result', $result->toFlash());
     }
 }

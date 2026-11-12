@@ -19,10 +19,14 @@ class ParticipantFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'name' => fake()->name(),
-            'nik' => fake()->unique()->numerify('EMP-######'),
-            'email' => fake()->safeEmail(),
-            'phone' => fake()->phoneNumber(),
-            'organization' => fake()->company(),
+            'bisnis_unit' => fake()->randomElement([
+                'Divisi IT',
+                'Divisi Keuangan',
+                'Divisi SDM',
+                'Divisi Operasional',
+                'Divisi Pemasaran',
+            ]),
+            'jabatan' => fake()->jobTitle(),
         ];
     }
 }

@@ -18,18 +18,18 @@ class ConsumptionPickupTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function presentParticipant(Event $event, ?string $organization, string $name): Participant
+    private function presentParticipant(Event $event, ?string $bisnisUnit, string $name): Participant
     {
         $participant = Participant::factory()->for($event)->create([
             'name' => $name,
-            'organization' => $organization,
+            'bisnis_unit' => $bisnisUnit,
         ]);
 
         Attendance::create([
             'event_id' => $event->id,
             'participant_id' => $participant->id,
             'checked_in_at' => now(),
-            'method' => AttendanceMethod::Nik,
+            'method' => AttendanceMethod::Name,
         ]);
 
         return $participant;
@@ -62,7 +62,7 @@ class ConsumptionPickupTest extends TestCase
         $staff = User::factory()->staff()->create();
 
         $this->presentParticipant($event, 'Divisi IT', 'Andi');
-        Participant::factory()->for($event)->create(['organization' => 'Divisi IT', 'name' => 'Cici']);
+        Participant::factory()->for($event)->create(['bisnis_unit' => 'Divisi IT', 'name' => 'Cici']);
 
         $this->actingAs($staff)
             ->get(route('events.consumptions.index', $event))
@@ -78,7 +78,7 @@ class ConsumptionPickupTest extends TestCase
 
         $presentA = $this->presentParticipant($event, 'Divisi IT', 'Andi');
         $presentB = $this->presentParticipant($event, 'Divisi IT', 'Budi');
-        $absent = Participant::factory()->for($event)->create(['organization' => 'Divisi IT', 'name' => 'Cici']);
+        $absent = Participant::factory()->for($event)->create(['bisnis_unit' => 'Divisi IT', 'name' => 'Cici']);
 
         $this->actingAs($staff)
             ->post(route('events.consumptions.store', $event), [
@@ -100,12 +100,12 @@ class ConsumptionPickupTest extends TestCase
         $this->assertDatabaseCount('consumption_claims', 2);
     }
 
-    public function test_members_without_organization_are_grouped_under_unassigned_division(): void
+    public function test_members_without_bisnis_unit_are_grouped_under_unassigned_division(): void
     {
         $event = Event::factory()->create();
         $staff = User::factory()->staff()->create();
 
-        $ungrouped = $this->presentParticipant($event, null, 'Tanpa Organisasi');
+        $ungrouped = $this->presentParticipant($event, null, 'Tanpa Bisnis Unit');
 
         $this->actingAs($staff)
             ->post(route('events.consumptions.store', $event), [

@@ -60,7 +60,7 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari nama, NIK, email, organisasi/instansi..."
+                    placeholder="Cari nama, bisnis unit, atau jabatan..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-enc-600 focus:outline-none focus:ring-2 focus:ring-enc-600/10">
             </div>
 
@@ -131,9 +131,8 @@
                     <thead class="bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         <tr>
                             <th class="px-5 py-3.5">Peserta</th>
-                            <th class="px-5 py-3.5">NIK</th>
-                            <th class="px-5 py-3.5">Kontak</th>
-                            <th class="px-5 py-3.5">Instansi / Organisasi</th>
+                            <th class="px-5 py-3.5">Bisnis Unit</th>
+                            <th class="px-5 py-3.5">Jabatan</th>
                             <th class="px-5 py-3.5">Status Presensi</th>
                         </tr>
                     </thead>
@@ -158,41 +157,11 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="whitespace-nowrap px-5 py-3.5">
-                                    @if($p->nik)
-                                        <span class="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-medium text-slate-700">
-                                            {{ $p->nik }}
-                                        </span>
-                                    @else
-                                        <span class="text-xs text-slate-400">—</span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-3.5">
-                                    <div class="space-y-0.5 text-xs">
-                                        @if($p->email)
-                                            <div class="flex items-center gap-1.5 text-slate-600">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                                    <polyline points="22,6 12,13 2,6"/>
-                                                </svg>
-                                                <span>{{ $p->email }}</span>
-                                            </div>
-                                        @endif
-                                        @if($p->phone)
-                                            <div class="flex items-center gap-1.5 text-slate-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                                                </svg>
-                                                <span>{{ $p->phone }}</span>
-                                            </div>
-                                        @endif
-                                        @if(!$p->email && !$p->phone)
-                                            <span class="text-slate-400">—</span>
-                                        @endif
-                                    </div>
+                                <td class="px-5 py-3.5 text-slate-600">
+                                    {{ $p->bisnis_unit ?: '—' }}
                                 </td>
                                 <td class="px-5 py-3.5 text-slate-600">
-                                    {{ $p->organization ?: '—' }}
+                                    {{ $p->jabatan ?: '—' }}
                                 </td>
                                 <td class="whitespace-nowrap px-5 py-3.5">
                                     @if($p->attendance)

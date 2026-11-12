@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ParticipantImportService
 {
-    public const COLUMNS = ['name', 'nik', 'email', 'phone', 'organization'];
+    public const COLUMNS = ['name', 'bisnis_unit', 'jabatan'];
 
     public const MAX_ROWS = 5000;
 
@@ -35,7 +35,7 @@ class ParticipantImportService
      *
      * - Baris 1 adalah header (nama kolom, tidak peka huruf besar/kecil).
      * - Pemisah kolom dideteksi otomatis: koma, titik koma (default Excel Indonesia), atau tab.
-     * - NIK boleh kosong, tetapi jika diisi harus unik di dalam event.
+     * - Nama wajib diisi; bisnis unit dan jabatan bersifat opsional.
      * - Baris yang gagal tidak menggagalkan baris lain; semuanya dilaporkan di $failed.
      */
     public function import(Event $event, UploadedFile $file): self
@@ -64,13 +64,6 @@ class ParticipantImportService
             return $this->fileError('Kolom "nama" (atau "name") tidak ditemukan di baris pertama. Pastikan baris pertama berisi header kolom.');
         }
 
-        // Muat NIK yang sudah ada sekali saja, supaya tidak query per baris.
-        $existingNiks = Participant::where('event_id', $event->id)
-            ->whereNotNull('nik')
-            ->pluck('nik')
-            ->mapWithKeys(fn ($nik) => [mb_strtolower((string) $nik) => true])
-            ->all();
-
         $rowNumber = 1;
         $processed = 0;
 
@@ -88,30 +81,17 @@ class ParticipantImportService
 
             $data = $this->normalizeData($this->extractRowData($raw, $columnMap));
 
-            if ($data['nik'] !== '' && $this->looksLikeScientific($data['nik'])) {
-                $this->fail($rowNumber, $data, [
-                    'nik' => ['NIK terbaca sebagai angka ilmiah (efek Excel). Format kolom NIK sebagai Text, lalu simpan ulang CSV.'],
-                ]);
-
-                continue;
-            }
-
             $validator = Validator::make($data, [
                 'name' => ['required', 'string', 'max:255'],
-                'nik' => ['nullable', 'string', 'max:32'],
-                'email' => ['nullable', 'email', 'max:255'],
-                'phone' => ['nullable', 'string', 'max:32'],
-                'organization' => ['nullable', 'string', 'max:255'],
+                'bisnis_unit' => ['nullable', 'string', 'max:255'],
+                'jabatan' => ['nullable', 'string', 'max:255'],
             ], [
                 'required' => ':attribute wajib diisi.',
                 'max' => ':attribute maksimal :max karakter.',
-                'email' => ':attribute bukan email yang valid.',
             ], [
                 'name' => 'nama',
-                'nik' => 'NIK',
-                'email' => 'email',
-                'phone' => 'no. HP',
-                'organization' => 'organisasi',
+                'bisnis_unit' => 'bisnis unit',
+                'jabatan' => 'jabatan',
             ]);
 
             if ($validator->fails()) {
@@ -120,27 +100,12 @@ class ParticipantImportService
                 continue;
             }
 
-            // Kolom kosong disimpan sebagai NULL (bukan ''), supaya aturan unik NIK per event
-            // tidak bentrok antar peserta yang NIK-nya kosong.
+            // Kolom kosong disimpan sebagai NULL (bukan '').
             $values = array_map(fn ($v) => $v === '' ? null : $v, $validator->validated());
-
-            $nikKey = $values['nik'] !== null ? mb_strtolower($values['nik']) : null;
-
-            if ($nikKey !== null && isset($existingNiks[$nikKey])) {
-                $this->fail($rowNumber, $data, [
-                    'nik' => ['NIK sudah terdaftar di event ini (atau sama dengan baris lain di file ini).'],
-                ]);
-
-                continue;
-            }
 
             try {
                 Participant::create(['event_id' => $event->id, ...$values]);
                 $this->success++;
-
-                if ($nikKey !== null) {
-                    $existingNiks[$nikKey] = true;
-                }
             } catch (\Throwable $e) {
                 report($e);
 
@@ -261,10 +226,8 @@ class ParticipantImportService
     {
         $aliases = [
             'name' => ['name', 'nama', 'nama lengkap', 'full name', 'peserta'],
-            'nik' => ['nik', 'ktp', 'no ktp', 'nomor ktp', 'nomor induk kependudukan'],
-            'email' => ['email', 'e-mail', 'mail'],
-            'phone' => ['phone', 'no hp', 'nomor hp', 'no telp', 'telp', 'telepon', 'hp', 'whatsapp', 'wa'],
-            'organization' => ['organization', 'organisasi', 'instansi', 'lembaga', 'perusahaan', 'company'],
+            'bisnis_unit' => ['bisnis unit', 'business unit', 'unit bisnis', 'unit', 'divisi', 'division', 'departemen', 'department', 'organisasi', 'organization', 'instansi', 'lembaga', 'perusahaan', 'company'],
+            'jabatan' => ['jabatan', 'posisi', 'position', 'jabatan posisi', 'role', 'title'],
         ];
 
         $map = [];
@@ -313,21 +276,12 @@ class ParticipantImportService
      */
     private function normalizeData(array $data): array
     {
-        return [
-            'name' => preg_replace('/\s+/u', ' ', $data['name']) ?? $data['name'],
-            'nik' => Participant::normalizeNik($data['nik']) ?? '',
-            'email' => mb_strtolower($data['email']),
-            'phone' => $data['phone'],
-            'organization' => $data['organization'],
-        ];
-    }
+        $collapse = fn (string $value): string => preg_replace('/\s+/u', ' ', $value) ?? $value;
 
-    /**
-     * Excel mengubah angka panjang (mis. NIK 16 digit) menjadi "3,20101E+15".
-     * Nilai seperti itu sudah rusak dan tidak boleh diimpor.
-     */
-    private function looksLikeScientific(string $value): bool
-    {
-        return preg_match('/^\d+(?:[.,]\d+)?e[+\-]?\d+$/i', $value) === 1;
+        return [
+            'name' => $collapse($data['name']),
+            'bisnis_unit' => $collapse($data['bisnis_unit']),
+            'jabatan' => $collapse($data['jabatan']),
+        ];
     }
 }

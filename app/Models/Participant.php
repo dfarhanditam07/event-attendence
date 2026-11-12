@@ -12,14 +12,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 // `qr_token` dibuat otomatis oleh sistem (kolom lama, NOT NULL) dan tidak boleh diisi dari input.
-#[Fillable(['event_id', 'name', 'nik', 'email', 'phone', 'organization'])]
+#[Fillable(['event_id', 'name', 'bisnis_unit', 'jabatan'])]
 class Participant extends Model
 {
     /** @use HasFactory<ParticipantFactory> */
     use HasFactory;
 
     /**
-     * Label penampung untuk peserta yang tidak punya nilai `organization`.
+     * Label penampung untuk peserta yang tidak punya nilai `bisnis_unit`.
      */
     public const UNASSIGNED_DIVISION = 'Tanpa Divisi';
 
@@ -27,10 +27,6 @@ class Participant extends Model
     {
         static::creating(function (Participant $participant): void {
             $participant->qr_token ??= Str::random(40);
-        });
-
-        static::saving(function (Participant $participant): void {
-            $participant->nik = static::normalizeNik($participant->nik);
         });
     }
 
@@ -50,14 +46,14 @@ class Participant extends Model
     }
 
     /**
-     * Nama divisi dari nilai `organization`. Peserta tanpa organisasi dikelompokkan
+     * Nama divisi dari nilai `bisnis_unit`. Peserta tanpa bisnis unit dikelompokkan
      * ke satu penampung "Tanpa Divisi".
      */
-    public static function normalizeDivision(?string $organization): string
+    public static function normalizeDivision(?string $bisnisUnit): string
     {
-        $organization = trim((string) $organization);
+        $bisnisUnit = trim((string) $bisnisUnit);
 
-        return $organization !== '' ? $organization : self::UNASSIGNED_DIVISION;
+        return $bisnisUnit !== '' ? $bisnisUnit : self::UNASSIGNED_DIVISION;
     }
 
     /**
@@ -70,58 +66,15 @@ class Participant extends Model
     {
         if ($division === self::UNASSIGNED_DIVISION) {
             return $query->where(fn (Builder $q): Builder => $q
-                ->whereNull('organization')
-                ->orWhereRaw("TRIM(organization) = ''"));
+                ->whereNull('bisnis_unit')
+                ->orWhereRaw("TRIM(bisnis_unit) = ''"));
         }
 
-        return $query->whereRaw('TRIM(organization) = ?', [$division]);
+        return $query->whereRaw('TRIM(bisnis_unit) = ?', [$division]);
     }
 
     /**
-     * Samakan format NIK dari input (form/CSV) supaya pencocokan konsisten.
-     *
-     * - Kosong -> null.
-     * - Kalau isinya hanya angka + pemisah (spasi, titik, strip) -> sisakan angka saja.
-     * - Selain itu (mis. "EMP-001") dibiarkan apa adanya.
-     */
-    public static function normalizeNik(?string $nik): ?string
-    {
-        $nik = trim((string) $nik);
-
-        if ($nik === '') {
-            return null;
-        }
-
-        if (preg_match('/^[\d\s.\-]+$/', $nik) === 1) {
-            return preg_replace('/\D/', '', $nik);
-        }
-
-        return $nik;
-    }
-
-    /**
-     * NIK yang disamarkan, hanya 4 karakter terakhir yang terlihat.
-     * Dipakai di halaman publik supaya NIK lengkap tidak pernah tampil.
-     */
-    public function maskedNik(): ?string
-    {
-        $nik = (string) $this->nik;
-
-        if ($nik === '') {
-            return null;
-        }
-
-        $length = mb_strlen($nik);
-
-        if ($length <= 4) {
-            return str_repeat('*', $length);
-        }
-
-        return str_repeat('*', $length - 4).mb_substr($nik, -4);
-    }
-
-    /**
-     * Cari berdasarkan nama, NIK, email, atau organisasi (tidak peka huruf besar/kecil).
+     * Cari berdasarkan nama, bisnis unit, atau jabatan (tidak peka huruf besar/kecil).
      * Untuk panel panitia (sudah login). JANGAN dipakai di halaman publik.
      */
     public function scopeSearch(Builder $query, ?string $term): Builder
@@ -136,15 +89,14 @@ class Participant extends Model
 
         return $query->where(function (Builder $q) use ($like): void {
             $q->whereRaw('LOWER(name) LIKE ?', [$like])
-                ->orWhereRaw('LOWER(nik) LIKE ?', [$like])
-                ->orWhereRaw('LOWER(email) LIKE ?', [$like])
-                ->orWhereRaw('LOWER(organization) LIKE ?', [$like]);
+                ->orWhereRaw('LOWER(bisnis_unit) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(jabatan) LIKE ?', [$like]);
         });
     }
 
     /**
      * Cari berdasarkan NAMA saja; setiap kata harus ada di dalam nama.
-     * Aman untuk halaman publik: tidak mencocokkan NIK, email, atau organisasi.
+     * Aman untuk halaman publik: tidak mencocokkan bisnis unit atau jabatan.
      */
     public function scopeNameMatches(Builder $query, string $term): Builder
     {
