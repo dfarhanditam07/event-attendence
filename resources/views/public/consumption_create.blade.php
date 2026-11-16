@@ -147,6 +147,16 @@
                                 </svg>
                                 Ulangi
                             </button>
+
+                            {{-- Fallback tanpa HTTPS: buka kamera bawaan perangkat lewat input file. --}}
+                            <button type="button" data-camera-native hidden
+                                    class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-enc-800 px-4 py-3 text-sm font-semibold text-white shadow-xs transition hover:bg-enc-900">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                    <circle cx="12" cy="13" r="4"/>
+                                </svg>
+                                Ambil Foto
+                            </button>
                         </div>
                     </div>
 
