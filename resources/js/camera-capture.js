@@ -270,11 +270,11 @@ export function initCameraCapture() {
 
     /**
      * Jalur fallback: buka aplikasi kamera bawaan OS lewat input berkas ber-atribut
-     * capture. Dipakai saat getUserMedia tidak tersedia (halaman diakses lewat http://),
-     * sehingga fitur ini tetap berfungsi tanpa koneksi HTTPS.
+     * capture (lihat consumption_create.blade.php). Dipakai saat getUserMedia tidak
+     * tersedia (halaman diakses lewat http://), sehingga fitur ini tetap berfungsi
+     * tanpa koneksi HTTPS.
      */
     const openNativeCamera = () => {
-        input.setAttribute('capture', 'environment');
         input.click();
     };
 

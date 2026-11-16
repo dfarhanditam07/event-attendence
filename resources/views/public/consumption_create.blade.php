@@ -168,8 +168,9 @@
                         Foto diambil langsung dari kamera perangkat (bukan unggah dari galeri) dan langsung terkirim ke sistem saat serah-terima dikonfirmasi.
                     </p>
 
-                    {{-- Foto hasil bidikan dikirim sebagai berkas oleh form multipart ini. --}}
-                    <input type="file" data-camera-input id="photo" name="photo" accept="image/*" class="hidden">
+                    {{-- Foto hasil bidikan dikirim sebagai berkas oleh form multipart ini.
+                         capture="environment" mengarahkan ke kamera bawaan perangkat tanpa butuh HTTPS. --}}
+                    <input type="file" data-camera-input id="photo" name="photo" accept="image/*" capture="environment" class="hidden">
 
                     @error('photo')
                         <p class="mt-1.5 text-xs text-rose-600">{{ $message }}</p>
