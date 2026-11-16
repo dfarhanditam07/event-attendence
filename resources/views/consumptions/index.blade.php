@@ -18,12 +18,13 @@
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $event->name }}</h1>
             <p class="mt-1 text-sm text-slate-500">
-                Pengambilan konsumsi kolektif per divisi. Porsi hanya dihitung untuk anggota yang sudah hadir (check-in).
+                Pengambilan konsumsi kolektif per divisi. Porsi hanya dihitung untuk anggota yang sudah hadir (check-in),
+                satu porsi per sesi makan (makan siang &amp; makan malam).
             </p>
         </div>
 
         @if($event->hasConsumptionKiosk())
-            <a href="{{ route('public.events.consumption.index', ['event' => $event, 'slug' => $event->slug]) }}"
+            <a href="{{ route('public.events.consumption.index', ['event' => $event, 'slug' => $event->slug, 'meal_session' => $mealSession->value]) }}"
                target="_blank" rel="noopener noreferrer"
                class="inline-flex flex-none items-center gap-1.5 rounded-xl border border-enc-200 bg-white px-3.5 py-2 text-xs font-semibold text-enc-800 shadow-xs transition hover:border-enc-300 hover:bg-enc-50">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -38,6 +39,7 @@
 
     @include('events._tabs', ['event' => $event])
     @include('consumptions._nav', ['event' => $event])
+    @include('consumptions._session_tabs', ['event' => $event, 'mealSession' => $mealSession])
 
     <!-- Metrics Grid -->
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -52,7 +54,7 @@
                 </span>
             </div>
             <div class="mt-2 text-3xl font-bold tracking-tight text-emerald-700">{{ $totals['present'] }}</div>
-            <div class="mt-1 text-xs text-emerald-600">Berhak atas konsumsi</div>
+            <div class="mt-1 text-xs text-emerald-600">Berhak atas konsumsi per sesi</div>
         </div>
 
         <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
@@ -65,7 +67,7 @@
                 </span>
             </div>
             <div class="mt-2 text-3xl font-bold tracking-tight text-slate-900">{{ $totals['claimed'] }}</div>
-            <div class="mt-1 text-xs text-slate-500">Porsi terserahkan</div>
+            <div class="mt-1 text-xs text-slate-500">Porsi terserahkan · {{ $mealSession->label() }}</div>
         </div>
 
         <div class="rounded-xl border border-amber-200/80 bg-white p-5 shadow-xs">
@@ -79,7 +81,7 @@
                 </span>
             </div>
             <div class="mt-2 text-3xl font-bold tracking-tight text-amber-700">{{ $totals['remaining'] }}</div>
-            <div class="mt-1 text-xs text-amber-600">Belum diambil</div>
+            <div class="mt-1 text-xs text-amber-600">Belum diambil · {{ $mealSession->label() }}</div>
         </div>
     </div>
 
@@ -140,7 +142,7 @@
                                 </td>
                                 <td class="px-5 py-3.5 text-right">
                                     @if($division['remaining'] > 0)
-                                        <a href="{{ route('events.consumptions.create', ['event' => $event, 'division' => $division['division']]) }}"
+                                        <a href="{{ route('events.consumptions.create', ['event' => $event, 'division' => $division['division'], 'meal_session' => $mealSession->value]) }}"
                                            class="inline-flex items-center gap-1.5 rounded-lg bg-enc-800 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-enc-900">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <polyline points="20 12 20 22 4 22 4 12"/>

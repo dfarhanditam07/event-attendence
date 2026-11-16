@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\MealSession;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ConsumptionPickupRequest extends FormRequest
 {
@@ -21,6 +23,7 @@ class ConsumptionPickupRequest extends FormRequest
     {
         return [
             'division' => ['required', 'string', 'max:255'],
+            'meal_session' => ['required', Rule::enum(MealSession::class)],
             'representative_name' => ['required', 'string', 'max:255'],
             'representative_contact' => ['nullable', 'string', 'max:32'],
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -34,6 +37,7 @@ class ConsumptionPickupRequest extends FormRequest
     {
         return [
             'division' => 'divisi',
+            'meal_session' => 'sesi makan',
             'representative_name' => 'nama perwakilan',
             'representative_contact' => 'no. HP perwakilan',
             'notes' => 'catatan',

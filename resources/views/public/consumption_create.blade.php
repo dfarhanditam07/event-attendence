@@ -6,7 +6,7 @@
 
 @section('content')
     <div class="mb-5 text-center">
-        <a href="{{ route('public.events.consumption.index', ['event' => $event, 'slug' => $event->slug]) }}"
+        <a href="{{ route('public.events.consumption.index', ['event' => $event, 'slug' => $event->slug, 'meal_session' => $mealSession->value]) }}"
            class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs backdrop-blur-xs transition hover:border-slate-300 hover:bg-slate-50">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"/>
@@ -22,10 +22,10 @@
             <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                 <div>
                     <h2 class="font-bold text-slate-900">Anggota Penerima — {{ $division }}</h2>
-                    <p class="text-xs text-slate-500">Semua anggota di bawah sudah check-in dan belum diambil porsinya.</p>
+                    <p class="text-xs text-slate-500">Semua anggota di bawah sudah check-in dan belum diambil porsi {{ $mealSession->label() }}nya.</p>
                 </div>
                 <span class="rounded-full bg-enc-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-enc-800">
-                    {{ $participants->count() }} porsi
+                    {{ $participants->count() }} porsi · {{ $mealSession->label() }}
                 </span>
             </div>
 
@@ -50,6 +50,7 @@
               class="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xl shadow-slate-200/40">
             @csrf
             <input type="hidden" name="division" value="{{ $division }}">
+            <input type="hidden" name="meal_session" value="{{ $mealSession->value }}">
 
             <h2 class="border-b border-slate-100 pb-4 font-bold text-slate-900">Data Serah-terima</h2>
 

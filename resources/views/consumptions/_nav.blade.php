@@ -1,8 +1,9 @@
 @php($current = request()->route()->getName())
 @php($onRecap = in_array($current, ['events.consumptions.index', 'events.consumptions.create'], true))
+@php($activeSession = $mealSession ?? null)
 
 <div class="mb-6 flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white p-1.5 shadow-xs">
-    <a href="{{ route('events.consumptions.index', $event) }}"
+    <a href="{{ route('events.consumptions.index', $activeSession ? ['event' => $event, 'meal_session' => $activeSession->value] : $event) }}"
        class="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition {{ $onRecap ? 'bg-enc-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1"/>

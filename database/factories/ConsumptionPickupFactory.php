@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\MealSession;
 use App\Models\ConsumptionPickup;
 use App\Models\Event;
 use App\Models\User;
@@ -20,6 +21,7 @@ class ConsumptionPickupFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'division' => fake()->company(),
+            'meal_session' => MealSession::Lunch->value,
             'representative_name' => fake()->name(),
             'representative_contact' => fake()->numerify('08##########'),
             'portions_count' => fake()->numberBetween(1, 20),

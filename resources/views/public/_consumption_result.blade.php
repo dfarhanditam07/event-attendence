@@ -20,6 +20,11 @@
                 </div>
 
                 <div class="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
+                    @if(!empty($lastResult['meal_session_label']))
+                        <span class="inline-flex items-center rounded-md bg-white/80 px-2.5 py-1 font-semibold text-emerald-900 ring-1 ring-emerald-200">
+                            {{ $lastResult['meal_session_label'] }}
+                        </span>
+                    @endif
                     <span class="inline-flex items-center rounded-md bg-white/80 px-2.5 py-1 font-semibold text-emerald-900 ring-1 ring-emerald-200">
                         {{ $lastResult['portions_count'] }} porsi
                     </span>

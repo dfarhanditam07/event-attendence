@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
@@ -40,9 +41,13 @@ class Participant extends Model
         return $this->hasOne(Attendance::class);
     }
 
-    public function consumptionClaim(): HasOne
+    /**
+     * Hak konsumsi peserta, satu baris per sesi makan yang sudah diambil
+     * (makan siang & makan malam).
+     */
+    public function consumptionClaims(): HasMany
     {
-        return $this->hasOne(ConsumptionClaim::class);
+        return $this->hasMany(ConsumptionClaim::class);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MealSession;
 use Database\Factories\ConsumptionPickupFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,10 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Satu transaksi serah-terima konsumsi (satu divisi per transaksi).
+ * Satu transaksi serah-terima konsumsi (satu divisi per sesi makan per transaksi).
  * `portions_count` = jumlah porsi yang benar-benar diserahkan pada transaksi ini.
  */
-#[Fillable(['event_id', 'division', 'representative_name', 'representative_contact', 'portions_count', 'handed_over_by', 'handed_over_by_name', 'photo_path', 'picked_up_at', 'notes'])]
+#[Fillable(['event_id', 'division', 'meal_session', 'representative_name', 'representative_contact', 'portions_count', 'handed_over_by', 'handed_over_by_name', 'photo_path', 'picked_up_at', 'notes'])]
 class ConsumptionPickup extends Model
 {
     /** @use HasFactory<ConsumptionPickupFactory> */
@@ -25,6 +26,7 @@ class ConsumptionPickup extends Model
     protected function casts(): array
     {
         return [
+            'meal_session' => MealSession::class,
             'picked_up_at' => 'datetime',
         ];
     }

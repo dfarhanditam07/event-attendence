@@ -11,7 +11,7 @@
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
                 <h2 class="text-lg font-bold text-slate-900 sm:text-xl">Pilih Divisi Pengambil</h2>
-                <p class="mt-0.5 text-xs text-slate-500">Porsi dihitung untuk anggota divisi yang sudah check-in dan belum diambil.</p>
+                <p class="mt-0.5 text-xs text-slate-500">Porsi dihitung untuk anggota divisi yang sudah check-in dan belum diambil pada sesi terpilih.</p>
             </div>
 
             <form method="POST" action="{{ route('public.events.consumption.lock', ['event' => $event, 'slug' => $event->slug]) }}">
@@ -25,6 +25,28 @@
                     Kunci Kiosk
                 </button>
             </form>
+        </div>
+
+        @php($sessions = \App\Enums\MealSession::cases())
+
+        {{-- Pemilih sesi makan: tiap sesi dihitung terpisah. --}}
+        <div class="mt-4 flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200/90 bg-slate-50 p-1.5">
+            @foreach($sessions as $session)
+                <a href="{{ route('public.events.consumption.index', ['event' => $event, 'slug' => $event->slug, 'meal_session' => $session->value]) }}"
+                   class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition {{ $mealSession === $session ? 'bg-enc-800 text-white shadow-xs' : 'text-slate-600 hover:bg-white hover:text-slate-900' }}">
+                    @if($session === \App\Enums\MealSession::Lunch)
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                        </svg>
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    @endif
+                    {{ $session->label() }}
+                </a>
+            @endforeach
         </div>
 
         @if($divisions->isEmpty())
@@ -62,7 +84,7 @@
                         </div>
 
                         @if($division['remaining'] > 0)
-                            <a href="{{ route('public.events.consumption.create', ['event' => $event, 'slug' => $event->slug, 'division' => $division['division']]) }}"
+                            <a href="{{ route('public.events.consumption.create', ['event' => $event, 'slug' => $event->slug, 'division' => $division['division'], 'meal_session' => $mealSession->value]) }}"
                                class="inline-flex flex-none items-center gap-1.5 rounded-lg bg-enc-800 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-enc-900">
                                 Serahkan
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

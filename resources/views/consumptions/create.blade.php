@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="mb-4">
-        <a href="{{ route('events.consumptions.index', $event) }}"
+        <a href="{{ route('events.consumptions.index', ['event' => $event, 'meal_session' => $mealSession->value]) }}"
            class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-slate-800">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"/>
@@ -16,7 +16,10 @@
 
     <div class="mb-6">
         <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $event->name }}</h1>
-        <p class="mt-1 text-sm text-slate-500">Serah-terima konsumsi untuk divisi <span class="font-semibold text-slate-800">{{ $division }}</span>.</p>
+        <p class="mt-1 text-sm text-slate-500">
+            Serah-terima konsumsi <span class="font-semibold text-slate-800">{{ $mealSession->label() }}</span>
+            untuk divisi <span class="font-semibold text-slate-800">{{ $division }}</span>.
+        </p>
     </div>
 
     @include('events._tabs', ['event' => $event])
@@ -37,7 +40,7 @@
                         <h2 class="font-bold text-slate-900">Anggota Penerima Konsumsi</h2>
                     </div>
                     <span class="rounded-full bg-enc-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-enc-800">
-                        {{ $participants->count() }} porsi
+                        {{ $participants->count() }} porsi · {{ $mealSession->label() }}
                     </span>
                 </div>
 
@@ -71,7 +74,7 @@
                     <line x1="12" y1="16" x2="12" y2="12"/>
                     <line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                Semua anggota di atas sudah check-in dan belum pernah diambil porsinya. Setiap peserta hanya bisa diambil konsumsinya satu kali.
+                Semua anggota di atas sudah check-in dan belum pernah diambil porsi {{ $mealSession->label() }}nya. Setiap peserta hanya bisa diambil konsumsinya satu kali per sesi makan.
             </p>
         </div>
 
@@ -81,6 +84,7 @@
                   class="rounded-xl border border-slate-200/80 bg-white p-6 shadow-xs">
                 @csrf
                 <input type="hidden" name="division" value="{{ $division }}">
+                <input type="hidden" name="meal_session" value="{{ $mealSession->value }}">
 
                 <h2 class="border-b border-slate-100 pb-4 font-bold text-slate-900">Data Perwakilan Pengambil</h2>
 

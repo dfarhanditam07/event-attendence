@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\AttendanceMethod;
+use App\Enums\MealSession;
 use App\Models\Attendance;
 use App\Models\ConsumptionPickup;
 use App\Models\Event;
@@ -95,6 +96,8 @@ class PublicConsumptionControllerTest extends TestCase
         $this->get(route('public.events.consumption.index', $this->kioskParams($event)))
             ->assertOk()
             ->assertSee('Pilih Divisi Pengambil')
+            ->assertSee('Makan Siang')
+            ->assertSee('Makan Malam')
             ->assertSee('Divisi IT');
     }
 
@@ -110,6 +113,7 @@ class PublicConsumptionControllerTest extends TestCase
 
         $this->post(route('public.events.consumption.store', $this->kioskParams($event)), [
             'division' => 'Divisi IT',
+            'meal_session' => MealSession::Lunch->value,
             'representative_name' => 'Rina',
             'handed_over_by_name' => 'Panitia A',
         ])->assertRedirectToRoute('public.events.consumption.index', $this->kioskParams($event));
@@ -139,23 +143,28 @@ class PublicConsumptionControllerTest extends TestCase
 
         $this->post(route('public.events.consumption.store', $this->kioskParams($event)), [
             'division' => 'Divisi IT',
+            'meal_session' => MealSession::Lunch->value,
             'representative_name' => 'Rina',
             'representative_contact' => '08123456789',
             'handed_over_by_name' => 'Panitia Meja 3',
             'photo' => UploadedFile::fake()->image('bukti.jpg'),
         ])
-            ->assertRedirectToRoute('public.events.consumption.index', $this->kioskParams($event))
+            ->assertRedirectToRoute('public.events.consumption.index', [
+                ...$this->kioskParams($event),
+                'meal_session' => MealSession::Lunch->value,
+            ])
             ->assertSessionHas('public_consumption_result');
 
         $pickup = ConsumptionPickup::sole();
         $this->assertSame(2, $pickup->portions_count);
+        $this->assertSame(MealSession::Lunch, $pickup->meal_session);
         $this->assertNull($pickup->handed_over_by);
         $this->assertSame('Panitia Meja 3', $pickup->handed_over_by_name);
         $this->assertTrue($pickup->hasPhoto());
         Storage::disk(ConsumptionPickupService::EVIDENCE_DISK)->assertExists($pickup->photo_path);
 
-        $this->assertDatabaseHas('consumption_claims', ['participant_id' => $presentA->id, 'consumption_pickup_id' => $pickup->id]);
-        $this->assertDatabaseHas('consumption_claims', ['participant_id' => $presentB->id, 'consumption_pickup_id' => $pickup->id]);
+        $this->assertDatabaseHas('consumption_claims', ['participant_id' => $presentA->id, 'consumption_pickup_id' => $pickup->id, 'meal_session' => MealSession::Lunch->value]);
+        $this->assertDatabaseHas('consumption_claims', ['participant_id' => $presentB->id, 'consumption_pickup_id' => $pickup->id, 'meal_session' => MealSession::Lunch->value]);
         $this->assertDatabaseMissing('consumption_claims', ['participant_id' => $absent->id]);
     }
 
@@ -188,6 +197,7 @@ class PublicConsumptionControllerTest extends TestCase
 
         $this->post(route('public.events.consumption.store', $this->kioskParams($event)), [
             'division' => 'Divisi IT',
+            'meal_session' => MealSession::Lunch->value,
             'representative_name' => 'Rina',
             'handed_over_by_name' => '',
         ])->assertSessionHasErrors(['photo', 'handed_over_by_name']);
@@ -206,6 +216,7 @@ class PublicConsumptionControllerTest extends TestCase
 
         $payload = [
             'division' => 'Divisi IT',
+            'meal_session' => MealSession::Lunch->value,
             'representative_name' => 'Rina',
             'handed_over_by_name' => 'Panitia A',
             'photo' => UploadedFile::fake()->image('bukti.jpg'),
@@ -219,6 +230,29 @@ class PublicConsumptionControllerTest extends TestCase
 
         $this->assertDatabaseCount('consumption_pickups', 1);
         $this->assertDatabaseCount('consumption_claims', 1);
+    }
+
+    public function test_kiosk_can_hand_out_the_same_division_for_both_meal_sessions(): void
+    {
+        Storage::fake(ConsumptionPickupService::EVIDENCE_DISK);
+
+        $event = Event::factory()->create(['consumption_pin' => self::PIN]);
+        $this->presentParticipant($event, 'Divisi IT', 'Andi');
+
+        $this->post(route('public.events.consumption.unlock', $this->kioskParams($event)), ['pin' => self::PIN]);
+
+        foreach ([MealSession::Lunch, MealSession::Dinner] as $mealSession) {
+            $this->post(route('public.events.consumption.store', $this->kioskParams($event)), [
+                'division' => 'Divisi IT',
+                'meal_session' => $mealSession->value,
+                'representative_name' => 'Rina',
+                'handed_over_by_name' => 'Panitia A',
+                'photo' => UploadedFile::fake()->image($mealSession->value.'.jpg'),
+            ]);
+        }
+
+        $this->assertDatabaseCount('consumption_pickups', 2);
+        $this->assertDatabaseCount('consumption_claims', 2);
     }
 
     public function test_lock_kiosk_requires_pin_again(): void

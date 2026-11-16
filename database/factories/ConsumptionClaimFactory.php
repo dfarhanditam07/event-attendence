@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\MealSession;
 use App\Models\ConsumptionClaim;
 use App\Models\ConsumptionPickup;
 use App\Models\Event;
@@ -22,6 +23,7 @@ class ConsumptionClaimFactory extends Factory
             'consumption_pickup_id' => ConsumptionPickup::factory(),
             'event_id' => Event::factory(),
             'participant_id' => Participant::factory(),
+            'meal_session' => MealSession::Lunch->value,
             'claimed_at' => now(),
         ];
     }

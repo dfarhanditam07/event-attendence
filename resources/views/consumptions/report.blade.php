@@ -60,9 +60,14 @@
                                 </div>
                             </div>
                         </div>
-                        <span class="inline-flex items-center gap-1.5 self-start rounded-full border border-emerald-200/90 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 sm:self-auto">
-                            {{ $pickup->portions_count }} porsi
-                        </span>
+                        <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
+                                {{ $pickup->meal_session->label() }}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+                                {{ $pickup->portions_count }} porsi
+                            </span>
+                        </div>
                     </div>
 
                     <dl class="grid gap-4 px-5 py-4 sm:grid-cols-2">

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\MealSession;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Serah-terima konsumsi lewat kiosk publik (tanpa login).
@@ -22,6 +24,7 @@ class PublicConsumptionPickupRequest extends FormRequest
     {
         return [
             'division' => ['required', 'string', 'max:255'],
+            'meal_session' => ['required', Rule::enum(MealSession::class)],
             'representative_name' => ['required', 'string', 'max:255'],
             'representative_contact' => ['nullable', 'string', 'max:32'],
             'handed_over_by_name' => ['required', 'string', 'max:255'],
@@ -37,6 +40,7 @@ class PublicConsumptionPickupRequest extends FormRequest
     {
         return [
             'division' => 'divisi',
+            'meal_session' => 'sesi makan',
             'representative_name' => 'nama perwakilan',
             'representative_contact' => 'no. HP perwakilan',
             'handed_over_by_name' => 'nama panitia penyerah',

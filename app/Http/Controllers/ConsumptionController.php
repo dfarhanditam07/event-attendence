@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\MealSession;
 use App\Http\Requests\ConsumptionPickupRequest;
 use App\Models\ConsumptionPickup;
 use App\Models\Event;
@@ -17,19 +18,22 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * Panel panitia untuk konsumsi kolektif per divisi.
  *
  * Alur: halaman utama (rekap per divisi) -> halaman serah-terima -> laporan audit trail.
- * Porsi hanya dihitung untuk anggota divisi yang sudah HADIR (check-in).
+ * Porsi dihitung untuk anggota divisi yang sudah HADIR (check-in), satu porsi per SESI MAKAN
+ * (makan siang & makan malam) sehingga satu kehadiran menghasilkan dua porsi.
  * Penyerahan juga bisa dicatat lewat kiosk publik (lihat PublicConsumptionController).
  */
 class ConsumptionController extends Controller
 {
-    public function index(Event $event, ConsumptionPickupService $service): View
+    public function index(Request $request, Event $event, ConsumptionPickupService $service): View
     {
         Gate::authorize('view', $event);
 
-        $divisions = $service->divisionSummaries($event);
+        $mealSession = $this->mealSessionFrom($request);
+        $divisions = $service->divisionSummaries($event, $mealSession);
 
         return view('consumptions.index', [
             'event' => $event,
+            'mealSession' => $mealSession,
             'divisions' => $divisions,
             'totals' => [
                 'present' => (int) $divisions->sum('present'),
@@ -51,17 +55,19 @@ class ConsumptionController extends Controller
                 ->with('error', 'Pilih divisi terlebih dahulu dari daftar konsumsi.');
         }
 
-        $participants = $service->eligibleParticipants($event, $division);
+        $mealSession = $this->mealSessionFrom($request);
+        $participants = $service->eligibleParticipants($event, $division, $mealSession);
 
         if ($participants->isEmpty()) {
             return redirect()
-                ->route('events.consumptions.index', $event)
-                ->with('error', 'Tidak ada anggota divisi "'.$division.'" yang hadir dan belum diambil konsumsinya.');
+                ->route('events.consumptions.index', ['event' => $event, 'meal_session' => $mealSession->value])
+                ->with('error', 'Tidak ada anggota divisi "'.$division.'" yang hadir dan belum diambil konsumsi '.$mealSession->label().'nya.');
         }
 
         return view('consumptions.create', [
             'event' => $event,
             'division' => $division,
+            'mealSession' => $mealSession,
             'participants' => $participants,
         ]);
     }
@@ -81,7 +87,7 @@ class ConsumptionController extends Controller
 
         return redirect()
             ->route('events.consumptions.report', $event)
-            ->with('success', 'Konsumsi divisi "'.$result->pickup->division.'" sebanyak '.$result->pickup->portions_count.' porsi berhasil dicatat.');
+            ->with('success', 'Konsumsi '.$result->pickup->meal_session->label().' divisi "'.$result->pickup->division.'" sebanyak '.$result->pickup->portions_count.' porsi berhasil dicatat.');
     }
 
     public function report(Event $event): View
@@ -118,5 +124,14 @@ class ConsumptionController extends Controller
         abort_unless($disk->exists($consumptionPickup->photo_path), 404);
 
         return $disk->response($consumptionPickup->photo_path);
+    }
+
+    /**
+     * Sesi makan yang sedang dipilih dari query string. Bila tidak valid/kosong,
+     * jatuh ke Makan Siang sebagai default.
+     */
+    private function mealSessionFrom(Request $request): MealSession
+    {
+        return MealSession::tryFrom($request->string('meal_session')->value()) ?? MealSession::Lunch;
     }
 }
